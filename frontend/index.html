@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SurgIntel — Surgical Evidence Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-primary: #050c1a;
+      --bg-secondary: #080f20;
+      --bg-card: #0a1428;
+      --bg-card-hover: #0d1a34;
+      --accent-cyan: #00d4ff;
+      --accent-cyan-dim: rgba(0, 212, 255, 0.15);
+      --accent-cyan-border: rgba(0, 212, 255, 0.3);
+      --accent-green: #00ff88;
+      --accent-amber: #f59e0b;
+      --text-primary: #e8f4f8;
+      --text-secondary: #7a9db8;
+      --text-muted: #3d5a73;
+      --border: rgba(0, 212, 255, 0.12);
+      --border-strong: rgba(0, 212, 255, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+    .display { font-family: 'DM Serif Display', serif; }
+
+    .cyan-text-glow { text-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+    .scanline {
+      position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      animation: scanline 5s linear infinite;
+      opacity: 0.25; pointer-events: none; z-index: 100;
+    }
+
+    .navbar {
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      background: rgba(5, 12, 26, 0.85);
+    }
+
+    .logo-hex {
+      width: 34px; height: 34px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: rgba(0, 212, 255, 0.12);
+      border: 1.5px solid rgba(0, 212, 255, 0.5);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .hero-glow {
+      background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(0, 212, 255, 0.1) 0%, transparent 65%);
+    }
+
+    .stat-block { text-align: center; }
+
+    .form-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 36px;
+    }
+
+    .field-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      padding: 12px 16px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      border-radius: 5px;
+    }
+    .form-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .tag-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      padding: 8px 10px;
+      display: flex; flex-wrap: wrap; gap: 6px;
+      min-height: 52px; cursor: text;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      align-items: flex-start;
+    }
+    .tag-container:focus-within {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+    }
+
+    .tag {
+      background: rgba(0, 212, 255, 0.12);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      color: var(--accent-cyan);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 3px;
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .tag-remove { cursor: pointer; opacity: 0.5; transition: opacity 0.15s; font-size: 14px; line-height: 1; }
+    .tag-remove:hover { opacity: 1; }
+
+    .tag-input {
+      background: transparent; border: none; outline: none;
+      color: var(--text-primary);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      flex: 1; min-width: 140px;
+      padding: 3px 4px;
+    }
+
+    .toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 13px; cursor: pointer; transition: 0.25s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; top: 3px;
+      background: var(--text-muted); border-radius: 50%; transition: 0.25s;
+    }
+    input:checked + .toggle-slider { background: rgba(0,212,255,0.15); border-color: var(--accent-cyan); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); background: var(--accent-cyan); }
+
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #050c1a;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600; font-size: 12px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 14px 32px; border: none; cursor: pointer;
+      transition: all 0.2s; border-radius: 4px;
+    }
+    .btn-primary:hover { background: #1af0ff; box-shadow: 0 0 28px rgba(0,212,255,0.35); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+    .btn-secondary {
+      background: transparent; color: var(--accent-cyan);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; letter-spacing: 0.08em;
+      padding: 9px 18px;
+      border: 1px solid var(--accent-cyan-border);
+      cursor: pointer; transition: all 0.2s; border-radius: 4px;
+      display: inline-block; text-decoration: none;
+    }
+    .btn-secondary:hover { background: var(--accent-cyan-dim); border-color: var(--accent-cyan); }
+
+    /* Loading bars */
+    @keyframes pulse-bar {
+      0%, 100% { opacity: 0.25; transform: scaleY(0.35); }
+      50% { opacity: 1; transform: scaleY(1); }
+    }
+    .loading-bar {
+      width: 3px; height: 24px; background: var(--accent-cyan);
+      border-radius: 2px; animation: pulse-bar 0.9s ease-in-out infinite;
+    }
+    .loading-bar:nth-child(2) { animation-delay: 0.12s; }
+    .loading-bar:nth-child(3) { animation-delay: 0.24s; }
+    .loading-bar:nth-child(4) { animation-delay: 0.36s; }
+    .loading-bar:nth-child(5) { animation-delay: 0.48s; }
+    .loading-bar:nth-child(6) { animation-delay: 0.60s; }
+
+    /* Score badge */
+    .score-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600; font-size: 24px;
+      width: 68px; height: 68px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border-radius: 5px; flex-shrink: 0; border: 1.5px solid;
+    }
+    .score-label { font-size: 9px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.65; }
+    .score-high { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.4); color: var(--accent-green); }
+    .score-mid  { background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.4); color: var(--accent-cyan); }
+
+    /* Paper card */
+    .paper-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 7px; padding: 24px;
+      transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .paper-card::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 2px;
+      background: var(--accent-cyan); opacity: 0; transition: opacity 0.25s;
+    }
+    .paper-card:hover { border-color: var(--border-strong); background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    .paper-card:hover::before { opacity: 1; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up { animation: fadeInUp 0.45s ease-out forwards; }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent-cyan); margin-bottom: 8px;
+    }
+
+    .stat-chip {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+      color: var(--text-muted);
+      background: rgba(0,212,255,0.04);
+      border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 3px;
+    }
+
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border-strong), transparent); }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); animation: blink 2.5s ease-in-out infinite; }
+
+    .register-box {
+      background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,212,255,0.02));
+      border: 1px solid var(--border-strong); border-radius: 8px;
+    }
+
+    .notification {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+      padding: 14px 20px; border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+      z-index: 1000; transform: translateY(80px); opacity: 0;
+      transition: all 0.3s; max-width: 340px; line-height: 1.5;
+    }
+    .notification.show { transform: translateY(0); opacity: 1; }
+    .notification.success { border-left: 3px solid var(--accent-green); }
+    .notification.error   { border-left: 3px solid #ff4757; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="scanline"></div>
+  <div id="notification" class="notification"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="logo-hex">
+        <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+          <path d="M7 1L13 4.5V11.5L7 15L1 11.5V4.5L7 1Z" stroke="#00d4ff" stroke-width="1.2"/>
+          <circle cx="7" cy="8" r="2.5" fill="#00d4ff" opacity="0.8"/>
+        </svg>
+      </div>
+      <span class="mono text-sm font-semibold tracking-widest" style="color:var(--accent-cyan)">SURGINTEL</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="status-dot"></div>
+      <span class="mono text-xs" style="color:var(--text-muted)">SYSTEM ONLINE</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero-glow min-h-screen flex items-center justify-center pt-20 px-6">
+    <div class="max-w-4xl w-full text-center">
+      <div class="section-label mb-8">Applied Intelligence · Surgical Evidence Platform</div>
+      <h1 class="display leading-tight mb-6" style="font-size:clamp(3rem,8vw,6rem); color:var(--text-primary)">
+        Stay at the<br>
+        <em style="color:var(--accent-cyan)" class="cyan-text-glow">cutting edge</em>
+      </h1>
+      <p class="mb-12 mx-auto" style="color:var(--text-secondary);max-width:560px;font-size:17px;line-height:1.75;font-weight:300">
+        Personalized evidence intelligence that monitors global surgical research weekly and delivers only what matters to your specific practice.
+      </p>
+
+      <div class="flex items-center justify-center gap-10 mb-14 flex-wrap">
+        <div class="stat-block">
+          <div class="mono text-3xl font-semibold mb-1" style="color:var(--accent-cyan)">35M+</div>
+          <div class="mono text-xs" style="color:var(--text-muted)">Papers indexed</div>
+        </div>
+        <div style="width:1px;height:40px;background:var(--border)"></div>
+        <div class="stat-block">
+          <div class="mono text-3xl font-semibold mb-1" style="color:var(--accent-cyan)">Weekly</div>
+          <div class="mono text-xs" style="color:var(--text-muted)">Automated digest</div>
+        </div>
+        <div style="width:1px;height:40px;background:var(--border)"></div>
+        <div class="stat-block">
+          <div class="mono text-3xl font-semibold mb-1" style="color:var(--accent-cyan)">AI</div>
+          <div class="mono text-xs" style="color:var(--text-muted)">Evidence triage</div>
+        </div>
+      </div>
+
+      <button onclick="document.getElementById('form-section').scrollIntoView({behavior:'smooth'})" class="btn-primary">
+        Build Your Profile →
+      </button>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section id="form-section" class="py-24 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="section-label">Profile Configuration</div>
+      <h2 class="display text-5xl mb-3" style="color:var(--text-primary)">Your surgical profile</h2>
+      <p class="mb-10" style="color:var(--text-secondary);font-size:15px;line-height:1.7">
+        The more specific your profile, the more precisely we can triage evidence for your practice.
+      </p>
+
+      <div class="form-card">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label class="field-label">Full Name</label>
+            <input type="text" id="name" class="form-input" placeholder="Dr. Sarah Chen">
+          </div>
+          <div>
+            <label class="field-label">Surgical Specialty</label>
+            <input type="text" id="specialty" class="form-input" placeholder="Plastic & Reconstructive Surgery">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="field-label">Procedures <span style="font-weight:300;letter-spacing:0.05em;text-transform:none">— press Enter to add each</span></label>
+          <div class="tag-container" id="procedures-container" onclick="document.getElementById('procedures-input').focus()">
+            <input type="text" id="procedures-input" class="tag-input" placeholder="e.g. rhinoplasty, DIEP flap...">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="field-label">Techniques & Devices <span style="font-weight:300;letter-spacing:0.05em;text-transform:none">— press Enter to add each</span></label>
+          <div class="tag-container" id="techniques-container" onclick="document.getElementById('techniques-input').focus()">
+            <input type="text" id="techniques-input" class="tag-input" placeholder="e.g. microsurgery, robotic-assisted...">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <label class="field-label">Years of Experience</label>
+            <input type="number" id="experience" class="form-input" placeholder="12" min="0" max="60">
+          </div>
+          <div>
+            <label class="field-label">Search Scope</label>
+            <div class="flex items-center gap-3 mt-3">
+              <label class="toggle">
+                <input type="checkbox" id="recent-only" checked>
+                <span class="toggle-slider"></span>
+              </label>
+              <div>
+                <div class="mono text-xs" style="color:var(--text-primary)">Recent papers only</div>
+                <div class="mono text-xs mt-0.5" style="color:var(--text-muted)">Last 6 months · toggle off for all-time</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider mb-8"></div>
+
+        <button id="analyze-btn" onclick="runAnalysis()" class="btn-primary w-full">
+          Generate Intelligence Digest
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section id="loading-section" class="py-20 px-6 hidden">
+    <div class="max-w-3xl mx-auto text-center">
+      <div class="flex items-end justify-center gap-1.5 mb-8">
+        <div class="loading-bar"></div>
+        <div class="loading-bar"></div>
+        <div class="loading-bar"></div>
+        <div class="loading-bar"></div>
+        <div class="loading-bar"></div>
+        <div class="loading-bar"></div>
+      </div>
+      <div class="mono text-sm mb-3 tracking-widest" style="color:var(--accent-cyan)">ANALYZING SURGICAL LITERATURE</div>
+      <div id="loading-step" class="mono text-xs" style="color:var(--text-muted)">Generating personalized search vectors...</div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results-section" class="py-16 px-6 hidden">
+    <div class="max-w-3xl mx-auto">
+      <div class="flex items-start justify-between mb-8 flex-wrap gap-4">
+        <div>
+          <div class="section-label">Intelligence Digest</div>
+          <h2 class="display text-4xl" style="color:var(--text-primary)">Your evidence brief</h2>
+        </div>
+        <div class="flex gap-3 items-center flex-wrap">
+          <span id="results-meta" class="stat-chip"></span>
+          <button onclick="resetForm()" class="btn-secondary">← New Profile</button>
+        </div>
+      </div>
+
+      <div class="mb-8 p-4 rounded-lg" style="background:rgba(0,212,255,0.03);border:1px solid var(--border)">
+        <div class="mono text-xs mb-3" style="color:var(--text-muted);letter-spacing:0.18em;text-transform:uppercase">Search vectors generated</div>
+        <div id="search-terms" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <div id="papers-container" class="flex flex-col gap-4 mb-12"></div>
+
+      <!-- Register CTA -->
+      <div class="register-box p-8">
+        <div class="flex items-start gap-6 flex-wrap">
+          <div class="flex-1">
+            <div class="section-label mb-2">Automated Intelligence</div>
+            <h3 class="display text-2xl mb-3" style="color:var(--text-primary)">Get your weekly digest</h3>
+            <p class="text-sm" style="color:var(--text-secondary);line-height:1.7">
+              Register your profile and we'll automatically monitor new publications every week — delivering only what's clinically relevant to your practice.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 items-center">
+            <button onclick="registerSurgeon()" id="register-btn" class="btn-primary whitespace-nowrap">
+              Register for Weekly Updates
+            </button>
+            <div class="mono text-xs" style="color:var(--text-muted)">No spam. Evidence only.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-10 px-6 mt-20" style="border-top:1px solid var(--border)">
+    <div class="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center gap-3">
+        <span class="mono text-xs font-semibold tracking-widest" style="color:var(--accent-cyan)">SURGINTEL</span>
+        <span class="mono text-xs" style="color:var(--text-muted)">Surgical Evidence Intelligence</span>
+      </div>
+      <div class="mono text-xs" style="color:var(--text-muted)">Built at Applied Intelligence Hackathon · 2025</div>
+    </div>
+  </footer>
+
+  <script>
+    // ── CONFIG ─────────────────────────────────────────────────
+    const API_BASE = 'http://localhost:8000'; // ← swap for Render URL after deploy
+
+    // ── STATE ──────────────────────────────────────────────────
+    const procedures = [];
+    const techniques = [];
+    let currentProfile = null;
+
+    // ── TAG INPUTS ─────────────────────────────────────────────
+    function setupTagInput(inputId, containerId, arr) {
+      const input = document.getElementById(inputId);
+      const container = document.getElementById(containerId);
+      input.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+          e.preventDefault();
+          const val = input.value.trim().replace(/,$/, '');
+          if (val && !arr.includes(val)) {
+            arr.push(val);
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.dataset.value = val;
+            tag.innerHTML = `${val}<span class="tag-remove" onclick="removeTag(this)">×</span>`;
+            container.insertBefore(tag, input);
+            input.value = '';
+          }
+        } else if (e.key === 'Backspace' && !input.value && arr.length > 0) {
+          const tags = container.querySelectorAll('.tag');
+          if (tags.length) {
+            const last = tags[tags.length - 1];
+            arr.splice(arr.indexOf(last.dataset.value), 1);
+            last.remove();
+          }
+        }
+      });
+    }
+
+    function removeTag(btn) {
+      const tag = btn.parentElement;
+      const container = tag.parentElement;
+      const arr = container.id === 'procedures-container' ? procedures : techniques;
+      arr.splice(arr.indexOf(tag.dataset.value), 1);
+      tag.remove();
+    }
+
+    setupTagInput('procedures-input', 'procedures-container', procedures);
+    setupTagInput('techniques-input', 'techniques-container', techniques);
+
+    // ── LOADING STEPS ──────────────────────────────────────────
+    const STEPS = [
+      'Generating personalized search vectors...',
+      'Querying PubMed database (35M papers)...',
+      'Retrieving recent publications...',
+      'Fetching paper abstracts...',
+      'Running AI evidence triage...',
+      'Scoring clinical relevance...',
+      'Compiling your digest...',
+    ];
+    let stepInterval;
+
+    function startLoading() {
+      let i = 0;
+      const el = document.getElementById('loading-step');
+      el.textContent = STEPS[0];
+      stepInterval = setInterval(() => { el.textContent = STEPS[++i % STEPS.length]; }, 3500);
+    }
+
+    function stopLoading() { clearInterval(stepInterval); }
+
+    // ── NOTIFICATIONS ──────────────────────────────────────────
+    function notify(msg, type = 'success') {
+      const el = document.getElementById('notification');
+      el.textContent = msg;
+      el.className = `notification ${type} show`;
+      setTimeout(() => el.classList.remove('show'), 4500);
+    }
+
+    // ── MAIN ANALYSIS ──────────────────────────────────────────
+    async function runAnalysis() {
+      const name        = document.getElementById('name').value.trim();
+      const specialty   = document.getElementById('specialty').value.trim();
+      const experience  = parseInt(document.getElementById('experience').value) || 0;
+      const recentOnly  = document.getElementById('recent-only').checked;
+
+      if (!name || !specialty) { notify('Please enter your name and specialty.', 'error'); return; }
+      if (!procedures.length)  { notify('Please add at least one procedure.', 'error'); return; }
+
+      currentProfile = { name, specialty, procedures: [...procedures], techniques: [...techniques], experience_years: experience, recent_only: recentOnly };
+
+      document.getElementById('loading-section').classList.remove('hidden');
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('form-section').style.opacity = '0.5';
+      document.getElementById('analyze-btn').disabled = true;
+      startLoading();
+      document.getElementById('loading-section').scrollIntoView({ behavior: 'smooth' });
+
+      try {
+        const res = await fetch(`${API_BASE}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentProfile),
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        renderResults(await res.json());
+      } catch (err) {
+        notify(`Error: ${err.message}`, 'error');
+        document.getElementById('loading-section').classList.add('hidden');
+      } finally {
+        stopLoading();
+        document.getElementById('form-section').style.opacity = '1';
+        document.getElementById('analyze-btn').disabled = false;
+      }
+    }
+
+    // ── RENDER RESULTS ─────────────────────────────────────────
+    function renderResults(data) {
+      document.getElementById('loading-section').classList.add('hidden');
+      const section = document.getElementById('results-section');
+      section.classList.remove('hidden');
+
+      document.getElementById('results-meta').textContent =
+        `${data.digest.length} relevant / ${data.total_found} found`;
+
+      const termsEl = document.getElementById('search-terms');
+      termsEl.innerHTML = '';
+      (data.search_terms || []).forEach(t => {
+        const chip = document.createElement('span');
+        chip.className = 'stat-chip';
+        chip.title = t;
+        chip.textContent = t.length > 55 ? t.slice(0, 55) + '…' : t;
+        termsEl.appendChild(chip);
+      });
+
+      const container = document.getElementById('papers-container');
+      container.innerHTML = '';
+
+      if (!data.digest.length) {
+        container.innerHTML = `
+          <div class="paper-card text-center py-12">
+            <div class="mono text-sm mb-4" style="color:var(--text-muted)">No highly relevant papers found in this window.</div>
+            <button onclick="document.getElementById('recent-only').checked=false;runAnalysis()" class="btn-secondary">Search all time →</button>
+          </div>`;
+      } else {
+        data.digest.forEach((item, idx) => {
+          const card = buildCard(item, idx);
+          container.appendChild(card);
+        });
+      }
+
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function buildCard(item, idx) {
+      const { score, reason, takeaway, paper } = item;
+      const scoreClass = score >= 9 ? 'score-high' : 'score-mid';
+      const authors = (paper.authors || []).join(', ') || 'Unknown';
+
+      const card = document.createElement('div');
+      card.className = 'paper-card fade-in-up';
+      card.style.cssText = `animation-delay:${idx * 0.09}s;opacity:0`;
+      card.innerHTML = `
+        <div class="flex gap-5">
+          <div class="score-badge ${scoreClass}">
+            <span>${score}</span>
+            <span class="score-label">/ 10</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-medium mb-3 leading-snug" style="color:var(--text-primary)">${paper.title}</h3>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="stat-chip">${paper.journal}</span>
+              <span class="stat-chip">${paper.pub_date}</span>
+              <span class="stat-chip">${authors}</span>
+            </div>
+            <div class="mb-3 p-3 rounded" style="background:rgba(0,212,255,0.04);border-left:2px solid var(--accent-cyan)">
+              <div class="mono text-xs mb-1.5" style="color:var(--accent-cyan);letter-spacing:0.12em;text-transform:uppercase">Relevance</div>
+              <p class="text-sm" style="color:var(--text-secondary);line-height:1.65">${reason}</p>
+            </div>
+            <div class="mb-4 p-3 rounded" style="background:rgba(0,255,136,0.04);border-left:2px solid rgba(0,255,136,0.4)">
+              <div class="mono text-xs mb-1.5" style="color:var(--accent-green);letter-spacing:0.12em;text-transform:uppercase">Clinical Takeaway</div>
+              <p class="text-sm" style="color:var(--text-secondary);line-height:1.65">${takeaway}</p>
+            </div>
+            <a href="${paper.url}" target="_blank" rel="noopener" class="btn-secondary text-xs">
+              Read on PubMed →
+            </a>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    // ── REGISTER ───────────────────────────────────────────────
+    async function registerSurgeon() {
+      if (!currentProfile) return;
+      const btn = document.getElementById('register-btn');
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+      try {
+        const res = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentProfile),
+        });
+        if (!res.ok) throw new Error();
+        btn.textContent = '✓ Registered for weekly updates';
+        btn.style.cssText = 'background:rgba(0,255,136,0.15);color:var(--accent-green);border:1px solid rgba(0,255,136,0.4)';
+        notify('Registered! Your weekly digest will run automatically.', 'success');
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Register for Weekly Updates';
+        notify('Registration failed. Please try again.', 'error');
+      }
+    }
+
+    // ── RESET ──────────────────────────────────────────────────
+    function resetForm() {
+      document.getElementById('results-section').classList.add('hidden');
+      document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
