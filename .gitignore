@@ -1,0 +1,8 @@
+.env
+store.json
+__pycache__/
+*.pyc
+*.tar.xz
+annas-mcp-bin
+annas-mcp_0.0.5_darwin_arm64/
+papers/
