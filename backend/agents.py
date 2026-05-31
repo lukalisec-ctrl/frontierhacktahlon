@@ -31,8 +31,13 @@ def _parse_json(text: str):
 def generate_search_terms(profile: dict) -> list[str]:
     result = _ask(f"""You are a medical research librarian.
 Given this surgeon's profile, generate 5 precise PubMed search queries
-to find relevant recent studies.
-Return ONLY a raw JSON array of 5 strings, no markdown, no explanation.
+to find relevant studies.
+
+IMPORTANT RULES:
+- Do NOT include any date filters (no [dp], no year ranges like 2020:2024)
+- Use only MeSH terms, procedure names, and Boolean operators (AND, OR)
+- Keep queries concise and specific to the surgeon's procedures and techniques
+- Return ONLY a raw JSON array of 5 strings, no markdown, no explanation
 
 Surgeon profile:
 {json.dumps(profile, indent=2)}""")
