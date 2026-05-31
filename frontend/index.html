@@ -79,7 +79,7 @@
     .hero {
       min-height: 100vh;
       display: flex; align-items: center;
-      padding: 80px 32px 64px;
+      padding: 80px 48px 64px;
       background: linear-gradient(160deg, #e8f4f8 0%, #f0f5f8 40%, #f0f5f8 100%);
       border-bottom: 1px solid var(--border);
       position: relative; overflow: hidden;
@@ -100,8 +100,103 @@
     }
 
     .hero-inner {
-      max-width: 760px; position: relative; z-index: 1;
+      max-width: 1200px; width: 100%; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 64px; align-items: center;
+      position: relative; z-index: 1;
     }
+
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-right  { display: none; }
+    }
+
+    /* ── Hero sample card ────────────────────────────────── */
+    .hero-right {
+      position: relative; display: flex;
+      align-items: center; justify-content: center;
+    }
+
+    .hero-card-stack {
+      position: relative; width: 100%; max-width: 420px;
+    }
+
+    .hero-card-ghost {
+      position: absolute; top: -10px; left: 10px; right: -10px; bottom: 10px;
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: var(--shadow-sm);
+      opacity: 0.5;
+    }
+
+    .hero-sample-card {
+      position: relative; z-index: 1;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 22px 22px 18px;
+      box-shadow: 0 8px 32px rgba(10,60,80,0.1), 0 2px 8px rgba(10,60,80,0.06);
+    }
+
+    .sample-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+
+    .sample-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--text-3);
+    }
+
+    .sample-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--teal);
+      background: var(--teal-light); border: 1px solid var(--teal-border);
+      padding: 2px 8px; border-radius: 3px;
+    }
+
+    .sample-paper { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+
+    .sample-badge {
+      width: 52px; height: 52px; border-radius: 6px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0; background: var(--green-dim);
+      border: 1px solid var(--green-border); color: var(--green);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .sample-badge-val { font-size: 20px; font-weight: 600; line-height: 1; }
+    .sample-badge-lbl { font-size: 7px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-top: 2px; }
+
+    .sample-paper-title {
+      font-size: 13px; font-weight: 500; line-height: 1.45;
+      color: var(--text-1); margin-bottom: 7px;
+    }
+
+    .sample-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+
+    .sample-insight {
+      border-radius: 4px; padding: 9px 11px; margin-bottom: 8px;
+    }
+    .sample-insight-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 8px;
+      font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .sample-insight-text { font-size: 11px; line-height: 1.6; color: var(--text-2); }
+
+    .sample-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+    .sample-second-paper {
+      display: flex; gap: 10px; align-items: center; opacity: 0.55;
+    }
+    .sample-second-badge {
+      width: 36px; height: 36px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--teal-dim); border: 1px solid var(--teal-border);
+      color: var(--teal); font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; font-weight: 600; flex-shrink: 0;
+    }
+    .sample-second-title { font-size: 12px; color: var(--text-2); line-height: 1.4; }
 
     .eyebrow {
       font-family: 'IBM Plex Mono', monospace;
@@ -511,36 +606,87 @@
     <div class="hero-accent"></div>
     <div class="hero-accent-2"></div>
     <div class="hero-inner">
-      <p class="eyebrow">Personalised Surgical Literature Monitor</p>
-      <h1>
-        Every week, the evidence<br>
-        that matters to <em>your procedures.</em><br>
-        Nothing else.
-      </h1>
-      <p class="hero-sub">
-        Surgeons spend an average of 3.5 hours per week searching for relevant research — most of it irrelevant to their specific practice. SurgIntel monitors PubMed continuously and delivers only the studies that map directly to the procedures and techniques you perform, with a clinical takeaway for each finding.
-      </p>
-      <div class="hero-proof">
-        <div class="proof-item">
-          <span class="proof-val">35M+</span>
-          <span class="proof-label">Papers monitored</span>
+
+      <!-- Left: text -->
+      <div>
+        <p class="eyebrow">Personalised Surgical Literature Monitor</p>
+        <h1>
+          Every week, the evidence<br>
+          that matters to <em>your procedures.</em><br>
+          Nothing else.
+        </h1>
+        <p class="hero-sub">
+          Surgeons spend an average of 3.5 hours per week searching for relevant research — most of it irrelevant to their specific practice. SurgIntel monitors PubMed continuously and delivers only the studies that map directly to the procedures and techniques you perform, with a clinical takeaway for each finding.
+        </p>
+        <div class="hero-proof">
+          <div class="proof-item">
+            <span class="proof-val">35M+</span>
+            <span class="proof-label">Papers monitored</span>
+          </div>
+          <div class="proof-item">
+            <span class="proof-val">Weekly</span>
+            <span class="proof-label">Automated search</span>
+          </div>
+          <div class="proof-item">
+            <span class="proof-val">Abstract</span>
+            <span class="proof-label">Level evidence</span>
+          </div>
+          <div class="proof-item">
+            <span class="proof-val">CPD</span>
+            <span class="proof-label">Ready citations</span>
+          </div>
         </div>
-        <div class="proof-item">
-          <span class="proof-val">Weekly</span>
-          <span class="proof-label">Automated search</span>
-        </div>
-        <div class="proof-item">
-          <span class="proof-val">Abstract</span>
-          <span class="proof-label">Level evidence</span>
-        </div>
-        <div class="proof-item">
-          <span class="proof-val">CPD</span>
-          <span class="proof-label">Ready citations</span>
+        <button class="btn btn-primary" onclick="document.getElementById('profile-section').scrollIntoView()">
+          Set up your profile
+        </button>
+      </div>
+
+      <!-- Right: sample result card -->
+      <div class="hero-right">
+        <div class="hero-card-stack">
+          <div class="hero-card-ghost"></div>
+          <div class="hero-sample-card">
+
+            <div class="sample-header">
+              <span class="sample-label">Literature Brief · Dr. James Whitfield</span>
+              <span class="sample-count">6 relevant papers</span>
+            </div>
+
+            <div class="sample-paper">
+              <div class="sample-badge">
+                <span class="sample-badge-val">9</span>
+                <span class="sample-badge-lbl">Match</span>
+              </div>
+              <div style="flex:1;min-width:0">
+                <p class="sample-paper-title">Long-term outcomes of DIEP flap breast reconstruction: a prospective cohort study.</p>
+                <div class="sample-meta">
+                  <span class="meta-journal" style="font-size:10px">Plast Reconstr Surg</span>
+                  <span class="meta-chip">2025 Mar</span>
+                  <span class="meta-chip">PMID 41823741</span>
+                  <span class="study-badge">Prospective</span>
+                </div>
+                <div class="sample-insight relevance-block">
+                  <p class="sample-insight-label" style="color:var(--teal)">Relevance to your practice</p>
+                  <p class="sample-insight-text">Directly evaluates DIEP flap outcomes — your primary reconstructive procedure — with 5-year efficacy and donor-site morbidity data relevant to patient counselling.</p>
+                </div>
+                <div class="sample-insight takeaway-block">
+                  <p class="sample-insight-label" style="color:var(--green)">Clinical Takeaway</p>
+                  <p class="sample-insight-text">92% satisfaction at 5 years; donor-site morbidity significantly lower than pedicled TRAM — supports DIEP as first-line in eligible candidates.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="sample-divider"></div>
+
+            <div class="sample-second-paper">
+              <div class="sample-second-badge">8</div>
+              <p class="sample-second-title">Intraoperative fluorescence imaging in free flap monitoring: a systematic review and meta-analysis.</p>
+            </div>
+
+          </div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="document.getElementById('profile-section').scrollIntoView()">
-        Set up your profile
-      </button>
+
     </div>
   </section>
 
