@@ -7,7 +7,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 EMAIL = "surgintel@hackathon.com"
-RECENT_DAYS = 180  # last 6 months by default
+RECENT_DAYS = 7  # last 7 days by default
 
 
 def _fetch_abstracts(pmids: list[str]) -> dict[str, str]:
