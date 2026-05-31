@@ -582,6 +582,29 @@
       to   { opacity: 1; transform: translateY(0); }
     }
     .fade-up { animation: fadeUp 320ms ease-out both; }
+
+    /* ── Skeleton ─────────────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+
+    .skel {
+      background: linear-gradient(90deg, #e4edf2 25%, #f0f6f9 50%, #e4edf2 75%);
+      background-size: 1200px 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+      border-radius: 4px;
+    }
+
+    .skel-card {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 9px; padding: 22px 24px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .skel-top { display: flex; gap: 18px; align-items: flex-start; }
   </style>
 </head>
 <body>
@@ -924,9 +947,13 @@
       saveProfile(profile);
 
       document.getElementById('loading-sec').classList.remove('hidden');
-      document.getElementById('results-sec').classList.add('hidden');
+      document.getElementById('results-sec').classList.remove('hidden');
       document.getElementById('profile-section').style.opacity = '0.5';
       document.getElementById('search-btn').disabled = true;
+      document.getElementById('res-count').textContent = 'Searching PubMed...';
+      document.getElementById('res-time').textContent = '';
+      document.getElementById('queries-chips').innerHTML = '';
+      renderSkeletons();
       startLoading();
       document.getElementById('loading-sec').scrollIntoView({ behavior: 'smooth' });
 
@@ -945,6 +972,27 @@
         stopLoading();
         document.getElementById('profile-section').style.opacity = '1';
         document.getElementById('search-btn').disabled = false;
+      }
+    }
+
+    function renderSkeletons(count = 3) {
+      const list = document.getElementById('papers-list');
+      list.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        list.innerHTML += `
+          <div class="skel-card">
+            <div class="skel-top">
+              <div class="skel" style="width:60px;height:60px;border-radius:6px;flex-shrink:0"></div>
+              <div style="flex:1;min-width:0">
+                <div class="skel" style="height:14px;width:88%;margin-bottom:8px"></div>
+                <div class="skel" style="height:14px;width:65%;margin-bottom:14px"></div>
+                <div class="skel" style="height:10px;width:45%;margin-bottom:14px"></div>
+                <div class="skel" style="height:58px;border-radius:5px;margin-bottom:8px"></div>
+                <div class="skel" style="height:58px;border-radius:5px;margin-bottom:12px"></div>
+                <div class="skel" style="height:28px;width:140px;border-radius:5px"></div>
+              </div>
+            </div>
+          </div>`;
       }
     }
 
