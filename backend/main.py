@@ -1,11 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from apscheduler.schedulers.background import BackgroundScheduler
 from agents import generate_search_terms, filter_papers
 from scraper import search_papers
 import json
 import os
+
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "surgify-mvp", "dist")
 
 app = FastAPI()
 
@@ -129,3 +133,13 @@ async def analyze(profile: SurgeonProfile):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Serve the React frontend — must come AFTER all API routes
+if os.path.exists(FRONTEND_DIST):
+    app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
+
+    @app.get("/app")
+    @app.get("/app/{full_path:path}")
+    async def serve_frontend(full_path: str = ""):
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
