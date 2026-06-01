@@ -6,3 +6,6 @@ __pycache__/
 annas-mcp-bin
 annas-mcp_0.0.5_darwin_arm64/
 papers/
+surgify-mvp/node_modules/
+annas-mcp/
+.DS_Store
