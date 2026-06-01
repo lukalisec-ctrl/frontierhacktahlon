@@ -1,10 +1,17 @@
 import json
 import os
 import re
-from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+# Kalibr must be imported before OpenAI to auto-instrument LLM calls
+try:
+    import kalibr  # noqa: F401 — auto-instruments all OpenAI-compatible calls
+except ImportError:
+    pass  # Kalibr not installed — agents still work without it
+
+from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
