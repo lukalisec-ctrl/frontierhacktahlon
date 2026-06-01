@@ -69,9 +69,9 @@ def startup():
     _load_store()
 
 
-@app.get("/")
+@app.get("/api/status")
 def root():
-    return {"status": "SurgIntel API running", "surgeons_registered": len(surgeon_profiles)}
+    return {"status": "Surgify API running", "surgeons_registered": len(surgeon_profiles)}
 
 
 class SurgeonProfile(BaseModel):
@@ -141,12 +141,12 @@ FRONTEND_HTML = os.path.join(os.path.dirname(__file__), "..", "frontend", "index
 if os.path.exists(FRONTEND_DIST):
     app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
 
+    @app.get("/onboard")
+    async def serve_onboard():
+        return FileResponse(FRONTEND_HTML)
+
+    @app.get("/")
     @app.get("/app")
     @app.get("/app/{full_path:path}")
     async def serve_frontend(full_path: str = ""):
         return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
-
-if os.path.exists(FRONTEND_HTML):
-    @app.get("/onboard")
-    async def serve_onboard():
-        return FileResponse(FRONTEND_HTML)
