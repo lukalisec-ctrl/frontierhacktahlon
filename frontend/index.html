@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SurgIntel — Surgical Literature Monitor</title>
+  <title>Surgify — Surgical Literature Monitor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -837,7 +837,7 @@
           <path d="M7 1.5v11M1.5 7h11M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="#0a8fa8" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
       </div>
-      <span class="nav-name">SURGINTEL</span>
+      <span class="nav-name">SURGIFY</span>
     </div>
     <span class="nav-source mono" style="font-size:11px;color:var(--text-3)">PubMed · 35M papers indexed</span>
   </nav>
@@ -857,7 +857,7 @@
           Nothing else.
         </h1>
         <p class="hero-sub">
-          Surgeons spend an average of 3.5 hours per week searching for relevant research — most of it irrelevant to their specific practice. SurgIntel monitors PubMed continuously and delivers only the studies that map directly to the procedures and techniques you perform, with a clinical takeaway for each finding.
+          Surgeons spend an average of 3.5 hours per week searching for relevant research — most of it irrelevant to their specific practice. Surgify monitors PubMed continuously and delivers only the studies that map directly to the procedures and techniques you perform, with a clinical takeaway for each finding.
         </p>
         <div class="hero-proof">
           <div class="proof-item">
@@ -1122,7 +1122,7 @@
       <div class="register-box">
         <div class="register-text">
           <h3 class="register-title">Automated weekly monitoring</h3>
-          <p class="register-sub">Register your profile and SurgIntel will run this search automatically each week, storing your latest brief so it's ready when you return.</p>
+          <p class="register-sub">Register your profile and Surgify will run this search automatically each week, storing your latest brief so it's ready when you return.</p>
         </div>
         <div class="register-actions">
           <button id="reg-btn" class="btn btn-primary" onclick="registerProfile()">Register for weekly updates</button>
@@ -1134,7 +1134,7 @@
 
   <!-- Footer -->
   <footer>
-    <p class="footer-brand"><strong>SURGINTEL</strong> &nbsp;Surgical Literature Monitor</p>
+    <p class="footer-brand"><strong>SURGIFY</strong> &nbsp;Surgical Literature Monitor</p>
     <p class="footer-attr">Built at Applied Intelligence Hackathon · 2025 &nbsp;·&nbsp; Data: PubMed / NLM</p>
   </footer>
 
@@ -1253,10 +1253,14 @@
 
     function updateTFProgress() {
       const pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
-      document.getElementById('tf-progress-fill').style.width = pct + '%';
-      document.getElementById('tf-counter').textContent = `${currentStep} / ${TOTAL_STEPS}`;
-      document.getElementById('tf-prev-btn').disabled = currentStep <= 1;
-      document.getElementById('tf-next-btn').disabled = currentStep >= TOTAL_STEPS;
+      const fill = document.getElementById('tf-progress-fill');
+      const counter = document.getElementById('tf-counter');
+      const prev = document.getElementById('tf-prev-btn');
+      const next = document.getElementById('tf-next-btn');
+      if (fill)    fill.style.width = pct + '%';
+      if (counter) counter.textContent = `${currentStep} / ${TOTAL_STEPS}`;
+      if (prev)    prev.disabled = currentStep <= 1;
+      if (next)    next.disabled = currentStep >= TOTAL_STEPS;
     }
 
     function validateStep(step) {
@@ -1358,12 +1362,12 @@
     }
 
     function saveProfile(p) {
-      try { localStorage.setItem('surgintel_profile', JSON.stringify(p)); } catch {}
+      try { localStorage.setItem('surgify_profile', JSON.stringify(p)); } catch {}
     }
 
     function loadProfile() {
       try {
-        const p = JSON.parse(localStorage.getItem('surgintel_profile') || 'null');
+        const p = JSON.parse(localStorage.getItem('surgify_profile') || 'null');
         if (!p) return;
         if (p.title) document.getElementById('inp-title').value = p.title;
         const nameParts = (p.name || '').replace(/^(Dr|Mr|Ms|Prof|Assoc Prof)\s+/, '');
@@ -1634,6 +1638,19 @@
       openTF();
       tfStep(6);
     }
+
+    // Expose all onclick handlers to global scope (required for file:// URLs)
+    window.openTF         = openTF;
+    window.closeTF        = closeTF;
+    window.tfStep         = tfStep;
+    window.togglePill     = togglePill;
+    window.getChecked     = getChecked;
+    window.runSearch      = runSearch;
+    window.registerProfile= registerProfile;
+    window.resetView      = resetView;
+    window.toggleAbstract = toggleAbstract;
+    window.copyCitation   = copyCitation;
+    window.dropTag        = dropTag;
   </script>
 </body>
 </html>
