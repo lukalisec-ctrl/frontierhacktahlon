@@ -136,6 +136,8 @@ async def analyze(profile: SurgeonProfile):
 
 
 # Serve the React frontend — must come AFTER all API routes
+FRONTEND_HTML = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+
 if os.path.exists(FRONTEND_DIST):
     app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
 
@@ -143,3 +145,8 @@ if os.path.exists(FRONTEND_DIST):
     @app.get("/app/{full_path:path}")
     async def serve_frontend(full_path: str = ""):
         return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+
+if os.path.exists(FRONTEND_HTML):
+    @app.get("/onboard")
+    async def serve_onboard():
+        return FileResponse(FRONTEND_HTML)

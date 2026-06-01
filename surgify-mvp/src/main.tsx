@@ -91,6 +91,30 @@ function App() {
   const [toast, setToast] = useState("");
   const [evidenceLoading, setEvidenceLoading] = useState(false);
 
+  // Read surgeon profile from localStorage (set by onboarding at /onboard)
+  const savedProfile = (() => {
+    try { return JSON.parse(localStorage.getItem("surgintel_profile") || "null"); } catch { return null; }
+  })();
+
+  const defaultProfile = {
+    name: "Dr Asha Sharma",
+    specialty: "Breast Surgery",
+    primary_procedures: ["breast-conserving surgery", "mastectomy", "sentinel lymph node biopsy", "axillary lymph node dissection", "oncoplastic breast surgery"],
+    secondary_procedures: [],
+    learning_procedures: [],
+    procedures: ["breast-conserving surgery", "mastectomy", "sentinel lymph node biopsy"],
+    approaches: ["open surgery", "minimally invasive"],
+    techniques: ["wide local excision", "oncoplastic surgery", "sentinel node biopsy"],
+    devices: [],
+    clinical_interests: ["margin status", "lymphoedema", "radiotherapy"],
+    study_types: [],
+    experience_years: 14,
+    recent_only: false,
+    cpd_logging: false
+  };
+
+  const activeProfile = savedProfile || defaultProfile;
+
   useEffect(() => {
     const fetchLiveEvidence = async () => {
       setEvidenceLoading(true);
@@ -98,22 +122,7 @@ function App() {
         const res = await fetch(`${API_BASE}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: "Dr Asha Sharma",
-            specialty: "Breast Surgery",
-            primary_procedures: ["breast-conserving surgery", "mastectomy", "sentinel lymph node biopsy", "axillary lymph node dissection", "oncoplastic breast surgery"],
-            secondary_procedures: [],
-            learning_procedures: [],
-            procedures: ["breast-conserving surgery", "mastectomy", "sentinel lymph node biopsy"],
-            approaches: ["open surgery", "minimally invasive"],
-            techniques: ["wide local excision", "oncoplastic surgery", "sentinel node biopsy"],
-            devices: [],
-            clinical_interests: ["margin status", "lymphoedema", "radiotherapy"],
-            study_types: [],
-            experience_years: 14,
-            recent_only: false,
-            cpd_logging: false
-          })
+          body: JSON.stringify(activeProfile)
         });
         if (!res.ok) return;
         const apiData = await res.json();
@@ -332,15 +341,23 @@ function LandingPage({ onSeeDemo }: { onSeeDemo: () => void }) {
             </span>
           </button>
 
-          <button
-            type="button"
-            data-testid="landing-see-demo-nav"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-white shadow-lift transition hover:bg-slate-800"
-            onClick={seeDemo}
-          >
-            See Demo
-            <ArrowRight size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="/onboard"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-white shadow-lift transition hover:bg-slate-800"
+            >
+              Build your profile
+              <ArrowRight size={16} />
+            </a>
+            <button
+              type="button"
+              data-testid="landing-see-demo-nav"
+              className="inline-flex items-center justify-center rounded-full border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-slate-100"
+              onClick={seeDemo}
+            >
+              See Demo
+            </button>
+          </div>
         </div>
       </header>
 
@@ -364,21 +381,21 @@ function LandingPage({ onSeeDemo }: { onSeeDemo: () => void }) {
                 care, then accept changes into a draft pathway for governance review.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
+                <a
+                  href="/onboard"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-white shadow-lift transition hover:bg-slate-800"
+                >
+                  Build your profile
+                  <ArrowRight size={17} />
+                </a>
                 <button
                   type="button"
                   data-testid="landing-see-demo-hero"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-white shadow-lift transition hover:bg-slate-800"
+                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/78 px-5 py-3 text-sm font-medium text-ink shadow-sm backdrop-blur-xl transition hover:bg-white"
                   onClick={seeDemo}
                 >
                   See Demo
-                  <ArrowRight size={17} />
                 </button>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center justify-center rounded-full border border-line bg-white/78 px-5 py-3 text-sm font-medium text-ink shadow-sm backdrop-blur-xl transition hover:bg-white"
-                >
-                  How it works
-                </a>
               </div>
             </div>
           </div>

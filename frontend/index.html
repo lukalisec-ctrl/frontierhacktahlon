@@ -1494,7 +1494,9 @@ const API_BASE = 'http://localhost:8000';
           body: JSON.stringify(profile),
         });
         if (!res.ok) throw new Error(`Server error ${res.status}`);
-        renderResults(await res.json());
+        await res.json();
+        // Redirect to the dashboard with the real profile
+        window.location.href = '/app';
       } catch (err) {
         toast(`Search failed: ${err.message}`, 'err');
         document.getElementById('loading-sec').classList.add('hidden');

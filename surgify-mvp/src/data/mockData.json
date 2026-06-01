@@ -1,0 +1,247 @@
+{
+  "surgeon": {
+    "name": "Dr Asha Sharma",
+    "role": "Breast Surgeon",
+    "unit": "Demo Breast Unit"
+  },
+  "surgeries": [
+    {
+      "id": "breast-conserving-surgery",
+      "name": "Breast-conserving surgery",
+      "indication": "Early-stage breast cancer suitable for breast conservation where clear margins and acceptable cosmetic outcome are achievable.",
+      "lastReviewed": "29 May 2026",
+      "pathway": {
+        "Pre-op": [
+          { "id": "bcs-pre-1", "text": "Confirm diagnosis with triple assessment" },
+          { "id": "bcs-pre-2", "text": "Mammogram and ultrasound" },
+          { "id": "bcs-pre-3", "text": "Core biopsy confirmation" },
+          { "id": "bcs-pre-4", "text": "MRI in selected cases", "updateId": "bcs-mri-selection" },
+          { "id": "bcs-pre-5", "text": "MDT discussion" },
+          { "id": "bcs-pre-6", "text": "Discuss breast conservation versus mastectomy" },
+          { "id": "bcs-pre-7", "text": "Discuss radiotherapy requirement" },
+          { "id": "bcs-pre-8", "text": "Discuss re-excision risk" },
+          { "id": "bcs-pre-9", "text": "Localisation planning if impalpable lesion" }
+        ],
+        "Operative": [
+          { "id": "bcs-op-1", "text": "Wide local excision" },
+          { "id": "bcs-op-2", "text": "Aim for clear margins" },
+          { "id": "bcs-op-3", "text": "Intra-operative specimen imaging when indicated" },
+          { "id": "bcs-op-4", "text": "Sentinel lymph node biopsy when indicated" },
+          { "id": "bcs-op-5", "text": "Oncoplastic closure in selected cases" },
+          { "id": "bcs-op-6", "text": "Cavity shave margins are performed based on surgeon preference.", "updateId": "bcs-cavity-shave" },
+          { "id": "bcs-op-7", "text": "Clips placed for radiotherapy planning" }
+        ],
+        "Post-op": [
+          { "id": "bcs-post-1", "text": "Histopathology review" },
+          { "id": "bcs-post-2", "text": "Margin status review" },
+          { "id": "bcs-post-3", "text": "MDT discussion" },
+          { "id": "bcs-post-4", "text": "Wound review at 1 to 2 weeks" },
+          { "id": "bcs-post-5", "text": "Discuss re-excision if margins are involved" },
+          { "id": "bcs-post-6", "text": "Refer for radiotherapy", "updateId": "bcs-hypofractionated-rt" },
+          { "id": "bcs-post-7", "text": "Refer for systemic therapy when indicated" },
+          { "id": "bcs-post-8", "text": "Routine follow-up schedule" }
+        ]
+      }
+    },
+    {
+      "id": "mastectomy",
+      "name": "Mastectomy",
+      "indication": "Breast cancer requiring full breast removal because of extent of disease, patient preference, contraindication to conservation or risk-reduction planning.",
+      "lastReviewed": "27 May 2026",
+      "pathway": {
+        "Pre-op": [
+          { "id": "mast-pre-1", "text": "Confirm diagnosis and extent of disease" },
+          { "id": "mast-pre-2", "text": "Discuss reconstruction options and patient decision aids", "updateId": "mast-reconstruction-decision-aid" },
+          { "id": "mast-pre-3", "text": "Anaesthetic and comorbidity assessment" },
+          { "id": "mast-pre-4", "text": "MDT treatment plan confirmation" }
+        ],
+        "Operative": [
+          { "id": "mast-op-1", "text": "Total mastectomy with planned incision and flap management" },
+          { "id": "mast-op-2", "text": "Sentinel node or axillary surgery when indicated" },
+          { "id": "mast-op-3", "text": "Drain placement according to surgeon preference" }
+        ],
+        "Post-op": [
+          { "id": "mast-post-1", "text": "Drain removal is based on output threshold and surgeon preference.", "updateId": "mast-early-drain" },
+          { "id": "mast-post-2", "text": "Wound and flap review" },
+          { "id": "mast-post-3", "text": "Histopathology and MDT review" },
+          { "id": "mast-post-4", "text": "Adjuvant therapy referral when indicated" }
+        ]
+      }
+    },
+    {
+      "id": "sentinel-lymph-node-biopsy",
+      "name": "Sentinel lymph node biopsy",
+      "indication": "Axillary staging for clinically node-negative or selected low-volume node-positive early breast cancer.",
+      "lastReviewed": "30 May 2026",
+      "pathway": {
+        "Pre-op": [
+          { "id": "slnb-pre-1", "text": "Axillary status is assessed with clinical examination and ultrasound when indicated.", "updateId": "slnb-low-risk-axilla" },
+          { "id": "slnb-pre-2", "text": "Confirm nuclear medicine or tracer pathway" },
+          { "id": "slnb-pre-3", "text": "Consent for sentinel node biopsy and possible escalation" }
+        ],
+        "Operative": [
+          { "id": "slnb-op-1", "text": "Dual tracer sentinel node localisation when available" },
+          { "id": "slnb-op-2", "text": "Remove clinically relevant sentinel nodes" },
+          { "id": "slnb-op-3", "text": "Document node count and mapping success" }
+        ],
+        "Post-op": [
+          { "id": "slnb-post-1", "text": "Review nodal histopathology" },
+          { "id": "slnb-post-2", "text": "MDT discussion for positive sentinel nodes" },
+          { "id": "slnb-post-3", "text": "Shoulder and wound review" }
+        ]
+      }
+    },
+    {
+      "id": "axillary-lymph-node-dissection",
+      "name": "Axillary lymph node dissection",
+      "indication": "Therapeutic axillary clearance for selected patients with clinically significant nodal disease where de-escalation is not appropriate.",
+      "lastReviewed": "25 May 2026",
+      "pathway": {
+        "Pre-op": [
+          { "id": "alnd-pre-1", "text": "Confirm nodal disease and MDT recommendation" },
+          { "id": "alnd-pre-2", "text": "Discuss lymphoedema, numbness and shoulder morbidity" },
+          { "id": "alnd-pre-3", "text": "Baseline arm and shoulder assessment when available" }
+        ],
+        "Operative": [
+          { "id": "alnd-op-1", "text": "Axillary clearance to agreed anatomical level" },
+          { "id": "alnd-op-2", "text": "Identify and preserve key neurovascular structures where possible" },
+          { "id": "alnd-op-3", "text": "Drain placement according to local practice" }
+        ],
+        "Post-op": [
+          { "id": "alnd-post-1", "text": "Patients are monitored for lymphoedema and shoulder stiffness after surgery.", "updateId": "alnd-early-physio" },
+          { "id": "alnd-post-2", "text": "Wound review and drain management" },
+          { "id": "alnd-post-3", "text": "Histopathology and adjuvant therapy planning" }
+        ]
+      }
+    },
+    {
+      "id": "oncoplastic-breast-surgery",
+      "name": "Oncoplastic breast surgery",
+      "indication": "Breast-conserving cancer surgery using volume displacement or replacement techniques to preserve breast shape and oncological safety.",
+      "lastReviewed": "28 May 2026",
+      "pathway": {
+        "Pre-op": [
+          { "id": "obs-pre-1", "text": "Cosmetic expectations, asymmetry and scarring are discussed during standard consent.", "updateId": "obs-counselling-checklist" },
+          { "id": "obs-pre-2", "text": "Photography and symmetry assessment when appropriate" },
+          { "id": "obs-pre-3", "text": "Discuss radiotherapy effects and revision possibility" }
+        ],
+        "Operative": [
+          { "id": "obs-op-1", "text": "Wide local excision with planned oncoplastic closure" },
+          { "id": "obs-op-2", "text": "Specimen orientation and imaging when indicated" },
+          { "id": "obs-op-3", "text": "Clip placement for radiotherapy planning" }
+        ],
+        "Post-op": [
+          { "id": "obs-post-1", "text": "Early wound and cosmetic review" },
+          { "id": "obs-post-2", "text": "Histopathology, margin and MDT review" },
+          { "id": "obs-post-3", "text": "Radiotherapy referral and follow-up schedule" }
+        ]
+      }
+    }
+  ],
+  "evidenceUpdates": [
+    {
+      "id": "bcs-cavity-shave",
+      "surgeryId": "breast-conserving-surgery",
+      "stage": "Operative",
+      "title": "Routine cavity shave margins may reduce re-excision risk",
+      "currentPractice": "Cavity shave margins are performed based on surgeon preference.",
+      "newEvidenceShows": "Routine cavity shave margins may reduce positive margin rates and re-excision rates in selected patients undergoing breast-conserving surgery.",
+      "priority": "High",
+      "articleTitle": "A Randomized Trial of Cavity Shave Margins in Breast Cancer",
+      "articleUrl": "https://www.nejm.org/doi/full/10.1056/NEJMoa1504473",
+      "suggestedAcceptedChange": "Consider routine cavity shave margins in selected patients undergoing breast-conserving surgery, subject to local protocol review.",
+      "status": "New"
+    },
+    {
+      "id": "slnb-low-risk-axilla",
+      "surgeryId": "sentinel-lymph-node-biopsy",
+      "stage": "Pre-op",
+      "title": "Selected low-risk patients may avoid escalation of axillary surgery",
+      "currentPractice": "Axillary status is assessed with clinical examination and ultrasound when indicated.",
+      "newEvidenceShows": "Selected low-risk patients with limited nodal disease may not require escalation to more aggressive axillary surgery when other treatment factors are favourable.",
+      "priority": "High",
+      "articleTitle": "Sentinel-Node Biopsy in Early Breast Cancer",
+      "articleUrl": "https://www.nejm.org/doi/full/10.1056/NEJMoa2105362",
+      "suggestedAcceptedChange": "Review axillary management pathway for selected low-risk patients at MDT before escalation to axillary lymph node dissection.",
+      "status": "New"
+    },
+    {
+      "id": "mast-early-drain",
+      "surgeryId": "mastectomy",
+      "stage": "Post-op",
+      "title": "Earlier drain removal may be suitable for selected low-risk patients",
+      "currentPractice": "Drain removal is based on output threshold and surgeon preference.",
+      "newEvidenceShows": "Selected low-risk mastectomy patients may be suitable for earlier drain removal protocols without substantially increasing seroma risk.",
+      "priority": "Medium",
+      "articleTitle": "Early Drain Removal After Breast Surgery",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "Consider local audit or protocol review for earlier drain removal in selected low-risk patients.",
+      "status": "Deferred"
+    },
+    {
+      "id": "obs-counselling-checklist",
+      "surgeryId": "oncoplastic-breast-surgery",
+      "stage": "Pre-op",
+      "title": "Structured counselling may improve expectation-setting",
+      "currentPractice": "Cosmetic expectations, asymmetry and scarring are discussed during standard consent.",
+      "newEvidenceShows": "Structured pre-operative counselling using patient-reported outcome data may improve expectation-setting and satisfaction after oncoplastic breast surgery.",
+      "priority": "Medium",
+      "articleTitle": "Patient-reported outcomes after oncoplastic breast surgery",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "Add a structured counselling checklist for symmetry, scarring, recovery time and revision possibility.",
+      "status": "Accepted"
+    },
+    {
+      "id": "alnd-early-physio",
+      "surgeryId": "axillary-lymph-node-dissection",
+      "stage": "Post-op",
+      "title": "Early physiotherapy may reduce shoulder morbidity",
+      "currentPractice": "Patients are monitored for lymphoedema and shoulder stiffness after surgery.",
+      "newEvidenceShows": "Early physiotherapy and structured patient education may reduce shoulder morbidity after axillary surgery.",
+      "priority": "High",
+      "articleTitle": "Early physiotherapy after axillary lymph node dissection",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "Add early physiotherapy referral and shoulder exercise education to the post-op pathway.",
+      "status": "New"
+    },
+    {
+      "id": "bcs-hypofractionated-rt",
+      "surgeryId": "breast-conserving-surgery",
+      "stage": "Post-op",
+      "title": "Shorter radiotherapy pathways may suit selected patients",
+      "currentPractice": "Patients are referred for radiotherapy using the standard post-operative referral pathway.",
+      "newEvidenceShows": "Selected patients may be suitable for hypofractionated radiotherapy pathways after breast-conserving surgery where oncology criteria are met.",
+      "priority": "Medium",
+      "articleTitle": "Hypofractionated radiotherapy for early breast cancer",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "Add an MDT prompt to consider hypofractionated radiotherapy suitability during post-operative planning.",
+      "status": "Accepted"
+    },
+    {
+      "id": "mast-reconstruction-decision-aid",
+      "surgeryId": "mastectomy",
+      "stage": "Pre-op",
+      "title": "Decision aids may improve reconstruction conversations",
+      "currentPractice": "Reconstruction options are discussed during standard consent.",
+      "newEvidenceShows": "Structured decision aids may improve patient understanding of reconstruction timing, trade-offs and recovery expectations.",
+      "priority": "Low",
+      "articleTitle": "Decision aids for breast reconstruction after mastectomy",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "Pilot a reconstruction decision aid before final operative consent for eligible patients.",
+      "status": "Deferred"
+    },
+    {
+      "id": "bcs-mri-selection",
+      "surgeryId": "breast-conserving-surgery",
+      "stage": "Pre-op",
+      "title": "Routine MRI expansion is not flagged for this pathway",
+      "currentPractice": "MRI is used in selected cases based on clinical and imaging factors.",
+      "newEvidenceShows": "Current local selection criteria remain reasonable; no active pathway change is proposed from this update.",
+      "priority": "Low",
+      "articleTitle": "Pre-operative MRI selection in early breast cancer",
+      "articleUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+      "suggestedAcceptedChange": "No change proposed.",
+      "status": "Dismissed"
+    }
+  ]
+}
