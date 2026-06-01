@@ -877,7 +877,7 @@
             <span class="proof-label">Ready citations</span>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="openTF()">
+        <button class="btn btn-primary" id="hero-cta">
           Set up your profile
         </button>
       </div>
@@ -1639,7 +1639,13 @@
       tfStep(6);
     }
 
-    // Expose all onclick handlers to global scope (required for file:// URLs)
+    // Attach hero CTA via event listener (most reliable cross-browser)
+    document.addEventListener('DOMContentLoaded', function() {
+      var cta = document.getElementById('hero-cta');
+      if (cta) cta.addEventListener('click', openTF);
+    });
+
+    // Also expose to window for any remaining inline onclick attributes
     window.openTF         = openTF;
     window.closeTF        = closeTF;
     window.tfStep         = tfStep;
