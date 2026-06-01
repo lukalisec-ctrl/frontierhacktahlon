@@ -29,18 +29,38 @@ def _parse_json(text: str):
 
 
 def generate_search_terms(profile: dict) -> list[str]:
-    result = _ask(f"""You are a medical research librarian.
-Given this surgeon's profile, generate 5 precise PubMed search queries
-to find relevant studies.
+    all_procedures = list({
+        *profile.get("primary_procedures", []),
+        *profile.get("secondary_procedures", []),
+        *profile.get("learning_procedures", []),
+        *profile.get("procedures", []),
+    })
+    all_techniques = list({
+        *profile.get("approaches", []),
+        *profile.get("techniques", []),
+        *profile.get("devices", []),
+    })
+    study_types = profile.get("study_types", [])
+    interests   = profile.get("clinical_interests", [])
 
-IMPORTANT RULES:
-- Do NOT include any date filters (no [dp], no year ranges like 2020:2024)
-- Use only MeSH terms, procedure names, and Boolean operators (AND, OR)
-- Keep queries concise and specific to the surgeon's procedures and techniques
-- Return ONLY a raw JSON array of 5 strings, no markdown, no explanation
+    result = _ask(f"""You are a medical research librarian building PubMed search queries.
 
-Surgeon profile:
-{json.dumps(profile, indent=2)}""")
+SURGEON PROFILE:
+- Specialty: {profile.get("specialty", "")} {("/ " + profile.get("subspecialty","")) if profile.get("subspecialty") else ""}
+- Procedures: {", ".join(all_procedures)}
+- Techniques & devices: {", ".join(all_techniques)}
+- Clinical interests: {", ".join(interests) if interests else "general outcomes"}
+- Preferred study types: {", ".join(study_types) if study_types else "any"}
+- Years in practice: {profile.get("experience_years", "")}
+
+Generate 5 precise PubMed search queries targeting this surgeon's specific practice.
+
+RULES:
+- Do NOT include date filters (no [dp], no year ranges)
+- Use MeSH terms and Boolean operators (AND, OR)
+- Each query should target a different procedure or technique combination
+- Bias toward the preferred study types if specified
+- Return ONLY a raw JSON array of 5 strings, no markdown, no explanation""")
     return _parse_json(result)
 
 

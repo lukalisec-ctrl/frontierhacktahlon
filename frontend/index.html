@@ -605,6 +605,119 @@
     }
 
     .skel-top { display: flex; gap: 18px; align-items: flex-start; }
+
+    /* ── Wizard ───────────────────────────────────────────── */
+    .wizard-wrap {
+      max-width: 760px; margin: 0 auto; padding: 0 32px;
+    }
+
+    .wizard-progress {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 40px;
+    }
+
+    .wp-step {
+      display: flex; align-items: center; gap: 8px; flex: 1;
+    }
+
+    .wp-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+      flex-shrink: 0; transition: all 250ms;
+      border: 1.5px solid #ccdde4; background: var(--bg-raised); color: var(--text-3);
+    }
+
+    .wp-dot.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .wp-dot.done   { background: var(--green); border-color: var(--green); color: #fff; }
+
+    .wp-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color 250ms; white-space: nowrap;
+    }
+    .wp-label.active { color: var(--teal); }
+    .wp-label.done   { color: var(--green); }
+
+    .wp-line {
+      flex: 1; height: 1px; background: #ccdde4; margin: 0 12px; transition: background 250ms;
+    }
+    .wp-line.done { background: var(--green); }
+
+    @media (max-width: 600px) {
+      .wp-label { display: none; }
+      .wp-line  { margin: 0 6px; }
+    }
+
+    .wizard-step { display: none; }
+    .wizard-step.active {
+      display: block;
+      animation: fadeUp 280ms ease-out both;
+    }
+
+    .step-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem; color: var(--text-1); margin-bottom: 4px;
+    }
+
+    .step-sub { font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 28px; }
+
+    .checkbox-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px;
+    }
+
+    .check-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-radius: var(--radius);
+      border: 1px solid #ccdde4; background: var(--bg-raised);
+      cursor: pointer; transition: all 180ms; user-select: none;
+    }
+    .check-pill:hover { border-color: var(--teal); background: var(--teal-dim); }
+    .check-pill.selected { border-color: var(--teal); background: var(--teal-light); }
+
+    .check-pill input { display: none; }
+
+    .check-mark {
+      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
+      border: 1.5px solid #ccdde4; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 180ms;
+    }
+    .check-pill.selected .check-mark {
+      background: var(--teal); border-color: var(--teal);
+    }
+    .check-pill.selected .check-mark::after {
+      content: ''; width: 4px; height: 7px;
+      border: 2px solid #fff; border-top: none; border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+      display: block;
+    }
+
+    .check-pill-label { font-size: 13px; color: var(--text-1); }
+
+    .wizard-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 32px; padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Summary step */
+    .summary-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+    }
+    @media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; } }
+
+    .summary-block {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+    }
+    .summary-block-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+      font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 8px;
+    }
+    .summary-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .summary-val { font-size: 14px; color: var(--text-1); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -713,45 +826,198 @@
     </div>
   </section>
 
-  <!-- Profile Form -->
+  <!-- Onboarding Wizard -->
   <section id="profile-section" class="section">
-    <div class="section-wrap">
-      <p class="section-eyebrow">Profile</p>
-      <h2>Your surgical profile</h2>
-      <p class="section-sub">Specificity improves relevance. The more precisely you describe your practice, the more accurate your literature brief will be.</p>
-      <div class="form-card">
-        <div class="field-row">
-          <div class="field">
-            <label class="label" for="inp-name">Name</label>
-            <input id="inp-name" class="input" type="text" placeholder="Dr. Sarah Chen" autocomplete="name">
-          </div>
-          <div class="field">
-            <label class="label" for="inp-spec">Surgical specialty</label>
-            <input id="inp-spec" class="input" type="text" placeholder="Plastic & Reconstructive Surgery">
-          </div>
-        </div>
+    <div class="wizard-wrap">
 
-        <div class="field">
-          <label class="label">Procedures <span>— press Enter after each</span></label>
-          <div class="tag-box" id="proc-box" onclick="document.getElementById('proc-in').focus()">
-            <input id="proc-in" class="tag-input" placeholder="rhinoplasty, DIEP flap, spinal fusion...">
-          </div>
+      <!-- Progress bar -->
+      <div class="wizard-progress" id="wizard-progress">
+        <div class="wp-step">
+          <div class="wp-dot active" id="dot-1">1</div>
+          <span class="wp-label active" id="lbl-1">Identity</span>
         </div>
-
-        <div class="field">
-          <label class="label">Techniques &amp; devices <span>— press Enter after each</span></label>
-          <div class="tag-box" id="tech-box" onclick="document.getElementById('tech-in').focus()">
-            <input id="tech-in" class="tag-input" placeholder="microsurgery, robotic-assisted, fluorescence imaging...">
-          </div>
+        <div class="wp-line" id="line-1"></div>
+        <div class="wp-step">
+          <div class="wp-dot" id="dot-2">2</div>
+          <span class="wp-label" id="lbl-2">Specialty</span>
         </div>
+        <div class="wp-line" id="line-2"></div>
+        <div class="wp-step">
+          <div class="wp-dot" id="dot-3">3</div>
+          <span class="wp-label" id="lbl-3">Procedures</span>
+        </div>
+        <div class="wp-line" id="line-3"></div>
+        <div class="wp-step">
+          <div class="wp-dot" id="dot-4">4</div>
+          <span class="wp-label" id="lbl-4">Techniques</span>
+        </div>
+        <div class="wp-line" id="line-4"></div>
+        <div class="wp-step">
+          <div class="wp-dot" id="dot-5">5</div>
+          <span class="wp-label" id="lbl-5">Preferences</span>
+        </div>
+        <div class="wp-line" id="line-5"></div>
+        <div class="wp-step">
+          <div class="wp-dot" id="dot-6">✓</div>
+          <span class="wp-label" id="lbl-6">Review</span>
+        </div>
+      </div>
 
-        <div class="field-row">
+      <!-- Step 1: Identity -->
+      <div class="wizard-step active" id="step-1">
+        <h3 class="step-title">Who are you?</h3>
+        <p class="step-sub">Your identity helps us personalise your brief and set up your weekly monitoring profile.</p>
+        <div class="form-card">
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="inp-title">Title</label>
+              <select id="inp-title" class="input" style="cursor:pointer">
+                <option>Dr</option>
+                <option>Mr</option>
+                <option>Ms</option>
+                <option>Prof</option>
+                <option>Assoc Prof</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label" for="inp-name">Full name</label>
+              <input id="inp-name" class="input" type="text" placeholder="James Whitfield" autocomplete="name">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="inp-institution">Hospital / Institution</label>
+              <input id="inp-institution" class="input" type="text" placeholder="Royal Melbourne Hospital">
+            </div>
+            <div class="field">
+              <label class="label" for="inp-country">Country</label>
+              <input id="inp-country" class="input" type="text" placeholder="Australia">
+            </div>
+          </div>
           <div class="field" style="margin-bottom:0">
             <label class="label" for="inp-exp">Years in practice</label>
-            <input id="inp-exp" class="input" type="number" placeholder="12" min="0" max="60">
+            <input id="inp-exp" class="input" type="number" placeholder="14" min="0" max="60" style="max-width:200px">
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <span></span>
+          <button class="btn btn-primary" onclick="goStep(2)">Next: Specialty →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Specialty -->
+      <div class="wizard-step" id="step-2">
+        <h3 class="step-title">What is your specialty?</h3>
+        <p class="step-sub">Your specialty and sub-specialty shape the vocabulary of your search queries. Be as specific as possible.</p>
+        <div class="form-card">
+          <div class="field">
+            <label class="label" for="inp-spec">Primary surgical specialty</label>
+            <input id="inp-spec" class="input" type="text" placeholder="Orthopaedic Surgery">
+          </div>
+          <div class="field">
+            <label class="label" for="inp-subspec">Sub-specialty <span>— optional</span></label>
+            <input id="inp-subspec" class="input" type="text" placeholder="Arthroplasty & Joint Reconstruction">
           </div>
           <div class="field" style="margin-bottom:0">
-            <label class="label">Search scope</label>
+            <label class="label" for="inp-interests">Clinical interests <span>— press Enter after each</span></label>
+            <div class="tag-box" id="interests-box" onclick="document.getElementById('interests-in').focus()">
+              <input id="interests-in" class="tag-input" placeholder="implant longevity, periprosthetic infection, patient outcomes...">
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Next: Procedures →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Procedures -->
+      <div class="wizard-step" id="step-3">
+        <h3 class="step-title">What procedures do you perform?</h3>
+        <p class="step-sub">Separating primary from secondary procedures helps the agent weight evidence appropriately. Add procedures you are learning to receive emerging evidence.</p>
+        <div class="form-card">
+          <div class="field">
+            <label class="label">Primary procedures <span>— your core practice, press Enter after each</span></label>
+            <div class="tag-box" id="primary-proc-box" onclick="document.getElementById('primary-proc-in').focus()">
+              <input id="primary-proc-in" class="tag-input" placeholder="total knee arthroplasty, total hip arthroplasty...">
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Secondary procedures <span>— less frequent, press Enter after each</span></label>
+            <div class="tag-box" id="secondary-proc-box" onclick="document.getElementById('secondary-proc-in').focus()">
+              <input id="secondary-proc-in" class="tag-input" placeholder="shoulder arthroplasty, ankle fusion...">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="label">Procedures in learning <span>— emerging techniques you want to follow, press Enter after each</span></label>
+            <div class="tag-box" id="learning-proc-box" onclick="document.getElementById('learning-proc-in').focus()">
+              <input id="learning-proc-in" class="tag-input" placeholder="unicompartmental knee arthroplasty...">
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(4)">Next: Techniques →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Techniques & Technology -->
+      <div class="wizard-step" id="step-4">
+        <h3 class="step-title">How do you operate?</h3>
+        <p class="step-sub">Your surgical approaches, specific techniques, and devices help us find evidence that matches your exact operative setup.</p>
+        <div class="form-card">
+          <div class="field">
+            <label class="label" style="margin-bottom:12px">Surgical approaches <span>— select all that apply</span></label>
+            <div class="checkbox-grid" id="approaches-grid">
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="open surgery"><div class="check-mark"></div><span class="check-pill-label">Open</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="laparoscopic"><div class="check-mark"></div><span class="check-pill-label">Laparoscopic</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="robotic-assisted"><div class="check-mark"></div><span class="check-pill-label">Robotic-assisted</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="arthroscopic"><div class="check-mark"></div><span class="check-pill-label">Arthroscopic</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="endoscopic"><div class="check-mark"></div><span class="check-pill-label">Endoscopic</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="minimally invasive"><div class="check-mark"></div><span class="check-pill-label">Minimally invasive</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="microsurgery"><div class="check-mark"></div><span class="check-pill-label">Microsurgery</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="image-guided"><div class="check-mark"></div><span class="check-pill-label">Image-guided</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Specific techniques <span>— press Enter after each</span></label>
+            <div class="tag-box" id="techniques-box" onclick="document.getElementById('techniques-in').focus()">
+              <input id="techniques-in" class="tag-input" placeholder="computer navigation, cementless fixation...">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="label">Devices &amp; implants used <span>— press Enter after each</span></label>
+            <div class="tag-box" id="devices-box" onclick="document.getElementById('devices-in').focus()">
+              <input id="devices-in" class="tag-input" placeholder="Mako robotic system, posterior stabilised implant...">
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(5)">Next: Preferences →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Research Preferences -->
+      <div class="wizard-step" id="step-5">
+        <h3 class="step-title">What evidence matters most?</h3>
+        <p class="step-sub">Filtering by study type ensures you see the level of evidence most relevant to your decision-making. Set your search window for how recent the evidence should be.</p>
+        <div class="form-card">
+          <div class="field">
+            <label class="label" style="margin-bottom:12px">Preferred study types <span>— select all that apply</span></label>
+            <div class="checkbox-grid" id="study-types-grid">
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="RCT"><div class="check-mark"></div><span class="check-pill-label">RCT</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Meta-analysis"><div class="check-mark"></div><span class="check-pill-label">Meta-analysis</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Systematic review"><div class="check-mark"></div><span class="check-pill-label">Systematic review</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Prospective cohort"><div class="check-mark"></div><span class="check-pill-label">Prospective cohort</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Retrospective study"><div class="check-mark"></div><span class="check-pill-label">Retrospective</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Case series"><div class="check-mark"></div><span class="check-pill-label">Case series</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Clinical guidelines"><div class="check-mark"></div><span class="check-pill-label">Guidelines</span></label>
+              <label class="check-pill" onclick="togglePill(this)"><input type="checkbox" value="Review article"><div class="check-mark"></div><span class="check-pill-label">Review</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Search window</label>
             <div class="toggle-row" style="margin-top:8px">
               <label class="toggle">
                 <input type="checkbox" id="tog-recent" checked>
@@ -763,14 +1029,37 @@
               </div>
             </div>
           </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="label">CPD / CME logging</label>
+            <div class="toggle-row" style="margin-top:8px">
+              <label class="toggle">
+                <input type="checkbox" id="tog-cpd">
+                <span class="toggle-track"></span>
+              </label>
+              <div>
+                <div class="toggle-main">Enable CPD logging</div>
+                <div class="toggle-sub">Track papers read for continuing professional development</div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div class="rule"></div>
-
-        <button id="search-btn" class="btn btn-primary" style="width:100%;justify-content:center" onclick="runSearch()">
-          Search my literature
-        </button>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" onclick="goStep(4)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(6)">Review profile →</button>
+        </div>
       </div>
+
+      <!-- Step 6: Summary -->
+      <div class="wizard-step" id="step-6">
+        <h3 class="step-title">Review your profile</h3>
+        <p class="step-sub">Confirm your details are correct before we generate your first literature brief.</p>
+        <div id="summary-content"></div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" onclick="goStep(5)">← Edit preferences</button>
+          <button id="search-btn" class="btn btn-primary" onclick="runSearch()">Generate my literature brief →</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -798,16 +1087,13 @@
             <span id="res-time" class="chip"></span>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="resetView()" style="margin-top:8px">← New search</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetView()" style="margin-top:8px">← Edit profile</button>
       </div>
-
       <div class="queries-block">
         <p class="queries-label">Search queries used</p>
         <div id="queries-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
-
       <div id="papers-list"></div>
-
       <div class="register-box">
         <div class="register-text">
           <h3 class="register-title">Automated weekly monitoring</h3>
@@ -829,13 +1115,24 @@
 
   <script>
     const API_BASE = 'http://localhost:8000';
-
-    const procs = [], techs = [];
     let profile = null;
+    let currentStep = 1;
+    const TOTAL_STEPS = 6;
 
-    function setupTags(inputId, boxId, arr) {
+    // ── Tag arrays ─────────────────────────────────────────
+    const tagArrays = {
+      'interests-box':      [],
+      'primary-proc-box':   [],
+      'secondary-proc-box': [],
+      'learning-proc-box':  [],
+      'techniques-box':     [],
+      'devices-box':        [],
+    };
+
+    function setupTags(inputId, boxId) {
       const inp = document.getElementById(inputId);
       const box = document.getElementById(boxId);
+      const arr = tagArrays[boxId];
       inp.addEventListener('keydown', e => {
         const val = inp.value.trim().replace(/,$/, '');
         if ((e.key === 'Enter' || e.key === ',') && val) {
@@ -858,13 +1155,134 @@
 
     function dropTag(x, boxId) {
       const tag = x.parentElement;
-      const arr  = boxId === 'proc-box' ? procs : techs;
+      const arr  = tagArrays[boxId];
       arr.splice(arr.indexOf(tag.dataset.val), 1);
       tag.remove();
     }
 
-    setupTags('proc-in', 'proc-box', procs);
-    setupTags('tech-in', 'tech-box', techs);
+    setupTags('interests-in',      'interests-box');
+    setupTags('primary-proc-in',   'primary-proc-box');
+    setupTags('secondary-proc-in', 'secondary-proc-box');
+    setupTags('learning-proc-in',  'learning-proc-box');
+    setupTags('techniques-in',     'techniques-box');
+    setupTags('devices-in',        'devices-box');
+
+    // ── Checkbox pills ─────────────────────────────────────
+    function togglePill(pill) {
+      pill.classList.toggle('selected');
+    }
+
+    function getChecked(gridId) {
+      return [...document.querySelectorAll(`#${gridId} .check-pill.selected input`)]
+        .map(i => i.value);
+    }
+
+    // ── Wizard navigation ──────────────────────────────────
+    function goStep(n) {
+      if (n > currentStep && !validateStep(currentStep)) return;
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      // Update progress dots
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        const lbl = document.getElementById(`lbl-${i}`);
+        const line = document.getElementById(`line-${i}`);
+        dot.className = 'wp-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+        dot.textContent = i < n ? '✓' : i === n ? i : i;
+        lbl.className = 'wp-label' + (i < n ? ' done' : i === n ? ' active' : '');
+        if (line) line.className = 'wp-line' + (i < n ? ' done' : '');
+      }
+      if (n === 6) buildSummary();
+      currentStep = n;
+      document.getElementById(`step-${n}`).classList.add('active');
+      document.getElementById('profile-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const name = document.getElementById('inp-name').value.trim();
+        if (!name) { toast('Please enter your name.', 'err'); return false; }
+      }
+      if (step === 2) {
+        const spec = document.getElementById('inp-spec').value.trim();
+        if (!spec) { toast('Please enter your surgical specialty.', 'err'); return false; }
+      }
+      if (step === 3) {
+        if (!tagArrays['primary-proc-box'].length) {
+          toast('Please add at least one primary procedure.', 'err'); return false;
+        }
+      }
+      return true;
+    }
+
+    // ── Build summary ──────────────────────────────────────
+    function buildSummary() {
+      const title    = document.getElementById('inp-title').value;
+      const name     = document.getElementById('inp-name').value.trim();
+      const inst     = document.getElementById('inp-institution').value.trim();
+      const country  = document.getElementById('inp-country').value.trim();
+      const exp      = document.getElementById('inp-exp').value;
+      const spec     = document.getElementById('inp-spec').value.trim();
+      const subspec  = document.getElementById('inp-subspec').value.trim();
+      const recent   = document.getElementById('tog-recent').checked;
+      const cpd      = document.getElementById('tog-cpd').checked;
+      const approaches = getChecked('approaches-grid');
+      const studyTypes = getChecked('study-types-grid');
+
+      const tag = v => `<span class="tag" style="pointer-events:none">${v}</span>`;
+
+      const blocks = [
+        { label: 'Surgeon', wide: true, val: `<span class="summary-val">${title} ${name}${inst ? ` · ${inst}` : ''}${country ? ` · ${country}` : ''} · ${exp || '?'} yrs</span>` },
+        { label: 'Specialty', val: `<span class="summary-val">${spec}${subspec ? ` / ${subspec}` : ''}</span>` },
+        { label: 'Clinical interests', val: tagArrays['interests-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Primary procedures', val: tagArrays['primary-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Secondary procedures', val: tagArrays['secondary-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Learning procedures', val: tagArrays['learning-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Surgical approaches', val: approaches.map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None selected</span>' },
+        { label: 'Specific techniques', val: tagArrays['techniques-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Devices & implants', val: tagArrays['devices-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
+        { label: 'Study types', val: studyTypes.map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">Any</span>' },
+        { label: 'Search window', val: `<span class="summary-val">${recent ? 'Last 7 days' : 'All time'}</span>` },
+        { label: 'CPD logging', val: `<span class="summary-val">${cpd ? 'Enabled' : 'Disabled'}</span>` },
+      ];
+
+      const grid = document.createElement('div');
+      grid.className = 'summary-grid';
+      blocks.forEach(b => {
+        const block = document.createElement('div');
+        block.className = 'summary-block' + (b.wide ? ' ' : '');
+        if (b.wide) block.style.gridColumn = '1 / -1';
+        block.innerHTML = `<p class="summary-block-label">${b.label}</p><div class="summary-tags">${b.val}</div>`;
+        grid.appendChild(block);
+      });
+
+      const container = document.getElementById('summary-content');
+      container.innerHTML = '';
+      container.appendChild(grid);
+    }
+
+    // ── Build profile object ───────────────────────────────
+    function buildProfile() {
+      return {
+        title:               document.getElementById('inp-title').value,
+        name:                `${document.getElementById('inp-title').value} ${document.getElementById('inp-name').value.trim()}`,
+        institution:         document.getElementById('inp-institution').value.trim(),
+        country:             document.getElementById('inp-country').value.trim(),
+        experience_years:    parseInt(document.getElementById('inp-exp').value) || 0,
+        specialty:           document.getElementById('inp-spec').value.trim(),
+        subspecialty:        document.getElementById('inp-subspec').value.trim(),
+        clinical_interests:  tagArrays['interests-box'],
+        primary_procedures:  tagArrays['primary-proc-box'],
+        secondary_procedures:tagArrays['secondary-proc-box'],
+        learning_procedures: tagArrays['learning-proc-box'],
+        procedures:          [...tagArrays['primary-proc-box'], ...tagArrays['secondary-proc-box']],
+        approaches:          getChecked('approaches-grid'),
+        techniques:          tagArrays['techniques-box'],
+        devices:             tagArrays['devices-box'],
+        study_types:         getChecked('study-types-grid'),
+        cpd_logging:         document.getElementById('tog-cpd').checked,
+        recent_only:         document.getElementById('tog-recent').checked,
+      };
+    }
 
     function saveProfile(p) {
       try { localStorage.setItem('surgintel_profile', JSON.stringify(p)); } catch {}
@@ -874,16 +1292,38 @@
       try {
         const p = JSON.parse(localStorage.getItem('surgintel_profile') || 'null');
         if (!p) return;
-        document.getElementById('inp-name').value = p.name || '';
-        document.getElementById('inp-spec').value = p.specialty || '';
-        document.getElementById('inp-exp').value  = p.experience_years || '';
-        document.getElementById('tog-recent').checked = p.recent_only !== false;
-        ['proc-box','tech-box'].forEach((boxId, i) => {
-          const arr = i === 0 ? procs : techs;
-          const inputId = i === 0 ? 'proc-in' : 'tech-in';
+        if (p.title) document.getElementById('inp-title').value = p.title;
+        const nameParts = (p.name || '').replace(/^(Dr|Mr|Ms|Prof|Assoc Prof)\s+/, '');
+        document.getElementById('inp-name').value        = nameParts;
+        document.getElementById('inp-institution').value = p.institution || '';
+        document.getElementById('inp-country').value     = p.country || '';
+        document.getElementById('inp-exp').value         = p.experience_years || '';
+        document.getElementById('inp-spec').value        = p.specialty || '';
+        document.getElementById('inp-subspec').value     = p.subspecialty || '';
+        document.getElementById('tog-recent').checked    = p.recent_only !== false;
+        document.getElementById('tog-cpd').checked       = p.cpd_logging || false;
+
+        const tagMap = {
+          'interests-box':       p.clinical_interests   || [],
+          'primary-proc-box':    p.primary_procedures   || [],
+          'secondary-proc-box':  p.secondary_procedures || [],
+          'learning-proc-box':   p.learning_procedures  || [],
+          'techniques-box':      p.techniques           || [],
+          'devices-box':         p.devices              || [],
+        };
+        const inputMap = {
+          'interests-box':       'interests-in',
+          'primary-proc-box':    'primary-proc-in',
+          'secondary-proc-box':  'secondary-proc-in',
+          'learning-proc-box':   'learning-proc-in',
+          'techniques-box':      'techniques-in',
+          'devices-box':         'devices-in',
+        };
+        Object.entries(tagMap).forEach(([boxId, vals]) => {
           const box = document.getElementById(boxId);
-          const inp = document.getElementById(inputId);
-          (i === 0 ? p.procedures : p.techniques || []).forEach(v => {
+          const inp = document.getElementById(inputMap[boxId]);
+          const arr = tagArrays[boxId];
+          vals.forEach(v => {
             if (!arr.includes(v)) {
               arr.push(v);
               const t = document.createElement('div');
@@ -893,12 +1333,25 @@
             }
           });
         });
+
+        // Restore checkboxes
+        (p.approaches || []).forEach(val => {
+          document.querySelectorAll('#approaches-grid .check-pill').forEach(pill => {
+            if (pill.querySelector('input').value === val) pill.classList.add('selected');
+          });
+        });
+        (p.study_types || []).forEach(val => {
+          document.querySelectorAll('#study-types-grid .check-pill').forEach(pill => {
+            if (pill.querySelector('input').value === val) pill.classList.add('selected');
+          });
+        });
       } catch {}
     }
 
     loadProfile();
 
-    const STEPS = [
+    // ── Loading steps ──────────────────────────────────────
+    const LOADING_STEPS = [
       'Generating search queries from your profile...',
       'Querying PubMed (National Library of Medicine)...',
       'Retrieving recent publications...',
@@ -911,20 +1364,20 @@
     function startLoading() {
       let i = 0;
       const el = document.getElementById('loading-step');
-      el.textContent = STEPS[0];
-      stepTimer = setInterval(() => { el.textContent = STEPS[++i % STEPS.length]; }, 3200);
+      el.textContent = LOADING_STEPS[0];
+      stepTimer = setInterval(() => { el.textContent = LOADING_STEPS[++i % LOADING_STEPS.length]; }, 3200);
     }
     function stopLoading() { clearInterval(stepTimer); }
 
     function detectStudyType(title) {
       const t = title.toLowerCase();
-      if (/\brct\b|randomized|randomised/.test(t))    return 'RCT';
-      if (/meta.analys|systematic review/.test(t))    return 'Meta-analysis';
-      if (/\breview\b/.test(t))                       return 'Review';
-      if (/prospective/.test(t))                      return 'Prospective';
-      if (/retrospective/.test(t))                    return 'Retrospective';
-      if (/case series|case report/.test(t))          return 'Case Series';
-      if (/cohort/.test(t))                           return 'Cohort';
+      if (/\brct\b|randomized|randomised/.test(t))  return 'RCT';
+      if (/meta.analys|systematic review/.test(t))  return 'Meta-analysis';
+      if (/\breview\b/.test(t))                     return 'Review';
+      if (/prospective/.test(t))                    return 'Prospective';
+      if (/retrospective/.test(t))                  return 'Retrospective';
+      if (/case series|case report/.test(t))        return 'Case Series';
+      if (/cohort/.test(t))                         return 'Cohort';
       return null;
     }
 
@@ -935,15 +1388,7 @@
     }
 
     async function runSearch() {
-      const name   = document.getElementById('inp-name').value.trim();
-      const spec   = document.getElementById('inp-spec').value.trim();
-      const exp    = parseInt(document.getElementById('inp-exp').value) || 0;
-      const recent = document.getElementById('tog-recent').checked;
-
-      if (!name || !spec) { toast('Please enter your name and specialty.', 'err'); return; }
-      if (!procs.length)  { toast('Please add at least one procedure.', 'err'); return; }
-
-      profile = { name, specialty: spec, procedures: [...procs], techniques: [...techs], experience_years: exp, recent_only: recent };
+      profile = buildProfile();
       saveProfile(profile);
 
       document.getElementById('loading-sec').classList.remove('hidden');
@@ -1113,7 +1558,8 @@
 
     function resetView() {
       document.getElementById('results-sec').classList.add('hidden');
-      document.getElementById('profile-section').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('loading-sec').classList.add('hidden');
+      goStep(6);
     }
   </script>
 </body>

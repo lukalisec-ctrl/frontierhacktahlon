@@ -71,11 +71,29 @@ def root():
 
 
 class SurgeonProfile(BaseModel):
+    # Identity
+    title: str = "Dr"
     name: str
+    institution: str = ""
+    country: str = ""
+    # Specialty
     specialty: str
-    procedures: list[str]
-    techniques: list[str]
+    subspecialty: str = ""
     experience_years: int
+    # Procedures
+    primary_procedures: list[str] = []
+    secondary_procedures: list[str] = []
+    learning_procedures: list[str] = []
+    procedures: list[str] = []          # legacy / combined fallback
+    # Techniques & technology
+    approaches: list[str] = []          # open, laparoscopic, robotic etc.
+    techniques: list[str] = []
+    devices: list[str] = []
+    # Research preferences
+    study_types: list[str] = []         # RCT, Meta-analysis, Review, etc.
+    clinical_interests: list[str] = []
+    cpd_logging: bool = False
+    # Search config
     recent_only: bool = True
 
 
