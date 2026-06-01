@@ -3,400 +3,320 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Surgify — Surgical Literature Monitor</title>
+  <title>Surgify — Build your profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ── Design tokens (match cofounder's tailwind.config) ── */
     :root {
-      --bg:          #f0f5f8;
-      --bg-raised:   #ffffff;
-      --bg-card:     #ffffff;
-      --bg-card-h:   #f6fafc;
-      --teal:        #0a8fa8;
-      --teal-mid:    #0e9cb5;
-      --teal-light:  #e6f5f8;
-      --teal-dim:    rgba(10,143,168,0.08);
-      --teal-border: rgba(10,143,168,0.2);
-      --green:       #0a9e6e;
-      --green-dim:   rgba(10,158,110,0.08);
-      --green-border:rgba(10,158,110,0.2);
-      --text-1:      #0c1f2c;
-      --text-2:      #3d606f;
-      --text-3:      #7a9aaa;
-      --border:      rgba(10,143,168,0.12);
-      --border-s:    rgba(10,143,168,0.22);
-      --shadow-sm:   0 1px 4px rgba(10,60,80,0.06), 0 2px 12px rgba(10,60,80,0.04);
-      --shadow-md:   0 4px 16px rgba(10,60,80,0.08), 0 1px 4px rgba(10,60,80,0.04);
-      --radius:      7px;
+      --ink:      #1D2524;
+      --graphite: #4D5A58;
+      --mist:     #F5F7F7;
+      --line:     #E4EAEA;
+      --teal:     #0F766E;
+      --teal-bg:  rgba(15,118,110,0.07);
+      --teal-bd:  rgba(15,118,110,0.22);
+      --white:    #ffffff;
+      --shadow-soft: 0 18px 60px rgba(29,37,36,0.08);
+      --shadow-lift: 0 10px 28px rgba(29,37,36,0.10);
+      --radius-card: 16px;
+      --radius-full: 9999px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
-      color: var(--text-1);
-      font-family: 'IBM Plex Sans', sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    .mono { font-family: 'IBM Plex Mono', monospace; }
+    /* ── Typeform overlay ──────────────────────────────────── */
+    .tf-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--mist);
+      display: none; flex-direction: column;
+    }
+    .tf-overlay.open {
+      display: flex;
+      animation: fadeIn 200ms ease both;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* ── Nav ──────────────────────────────────────────────── */
-    .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    /* progress bar */
+    .tf-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--line);
+    }
+    .tf-bar-fill {
+      height: 100%; background: var(--teal); transition: width 380ms ease;
+    }
+
+    /* nav */
+    .tf-nav {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 56px;
-      background: rgba(240,245,248,0.92);
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(10px);
+      padding: 18px 28px;
     }
 
-    .nav-brand { display: flex; align-items: center; gap: 10px; }
-
-    .nav-mark {
-      width: 28px; height: 28px; border-radius: 5px;
-      background: var(--teal-light);
-      border: 1px solid var(--teal-border);
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .nav-name {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px; font-weight: 600;
-      letter-spacing: 0.14em; color: var(--teal);
-    }
-
-    .nav-source {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--text-3);
-    }
-
-    /* ── Hero ─────────────────────────────────────────────── */
-    .hero {
-      min-height: 100vh;
-      display: flex; align-items: center;
-      padding: 80px 48px 64px;
-      background: linear-gradient(160deg, #e8f4f8 0%, #f0f5f8 40%, #f0f5f8 100%);
-      border-bottom: 1px solid var(--border);
-      position: relative; overflow: hidden;
-    }
-
-    .hero-accent {
-      position: absolute; top: -120px; right: -80px;
-      width: 600px; height: 600px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(10,143,168,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-accent-2 {
-      position: absolute; bottom: -100px; left: -60px;
-      width: 400px; height: 400px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(10,143,168,0.05) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-inner {
-      max-width: 1200px; width: 100%; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 64px; align-items: center;
-      position: relative; z-index: 1;
-    }
-
-    @media (max-width: 900px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .hero-right  { display: none; }
-    }
-
-    /* ── Hero sample card ────────────────────────────────── */
-    .hero-right {
-      position: relative; display: flex;
-      align-items: center; justify-content: center;
-    }
-
-    .hero-card-stack {
-      position: relative; width: 100%; max-width: 420px;
-    }
-
-    .hero-card-ghost {
-      position: absolute; top: -10px; left: 10px; right: -10px; bottom: 10px;
-      background: var(--bg-raised); border: 1px solid var(--border);
-      border-radius: 10px; box-shadow: var(--shadow-sm);
-      opacity: 0.5;
-    }
-
-    .hero-sample-card {
-      position: relative; z-index: 1;
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: 10px; padding: 22px 22px 18px;
-      box-shadow: 0 8px 32px rgba(10,60,80,0.1), 0 2px 8px rgba(10,60,80,0.06);
-    }
-
-    .sample-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 12px; border-bottom: 1px solid var(--border);
-    }
-
-    .sample-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; font-weight: 500; letter-spacing: 0.16em;
-      text-transform: uppercase; color: var(--text-3);
-    }
-
-    .sample-count {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--teal);
-      background: var(--teal-light); border: 1px solid var(--teal-border);
-      padding: 2px 8px; border-radius: 3px;
-    }
-
-    .sample-paper { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
-
-    .sample-badge {
-      width: 52px; height: 52px; border-radius: 6px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      flex-shrink: 0; background: var(--green-dim);
-      border: 1px solid var(--green-border); color: var(--green);
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    .sample-badge-val { font-size: 20px; font-weight: 600; line-height: 1; }
-    .sample-badge-lbl { font-size: 7px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-top: 2px; }
-
-    .sample-paper-title {
-      font-size: 13px; font-weight: 500; line-height: 1.45;
-      color: var(--text-1); margin-bottom: 7px;
-    }
-
-    .sample-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-
-    .sample-insight {
-      border-radius: 4px; padding: 9px 11px; margin-bottom: 8px;
-    }
-    .sample-insight-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 8px;
-      font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px;
-    }
-    .sample-insight-text { font-size: 11px; line-height: 1.6; color: var(--text-2); }
-
-    .sample-divider { height: 1px; background: var(--border); margin: 12px 0; }
-
-    .sample-second-paper {
-      display: flex; gap: 10px; align-items: center; opacity: 0.55;
-    }
-    .sample-second-badge {
-      width: 36px; height: 36px; border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--teal-dim); border: 1px solid var(--teal-border);
-      color: var(--teal); font-family: 'IBM Plex Mono', monospace;
-      font-size: 14px; font-weight: 600; flex-shrink: 0;
-    }
-    .sample-second-title { font-size: 12px; color: var(--text-2); line-height: 1.4; }
-
-    .eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--teal); margin-bottom: 24px;
+    .tf-logo {
       display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 600; color: var(--ink);
+      text-decoration: none;
     }
 
-    .eyebrow::before {
-      content: '';
-      display: inline-block; width: 24px; height: 1.5px;
-      background: var(--teal); flex-shrink: 0;
+    .tf-logo-mark {
+      width: 32px; height: 32px; border-radius: 10px;
+      border: 1px solid var(--line); background: var(--white);
+      box-shadow: 0 1px 4px rgba(29,37,36,0.06);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
     }
 
-    h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.4rem, 5.5vw, 4rem);
-      line-height: 1.12; color: var(--text-1);
-      margin-bottom: 24px; max-width: 680px;
+    .tf-counter {
+      font-size: 12px; color: var(--graphite); font-weight: 500;
     }
 
-    h1 em { font-style: italic; color: var(--teal); }
-
-    .hero-sub {
-      font-size: 17px; font-weight: 300; line-height: 1.8;
-      color: var(--text-2); max-width: 580px; margin-bottom: 40px;
+    .tf-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--graphite); font-size: 20px; line-height: 1;
+      padding: 4px; transition: color 150ms;
     }
+    .tf-close:hover { color: var(--ink); }
 
-    .hero-proof {
-      display: flex; gap: 0; margin-bottom: 44px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg-raised);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden; width: fit-content;
+    /* step area */
+    .tf-steps { position: relative; flex: 1; overflow: hidden; }
+
+    .tf-step {
+      position: absolute; inset: 0;
+      display: flex; align-items: center;
+      padding: 88px clamp(24px, 12vw, 160px) 80px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(40px);
+      transition: opacity 360ms ease, transform 360ms ease;
+      overflow-y: auto;
     }
+    .tf-step.active  { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .tf-step.exit-up { opacity: 0; transform: translateY(-36px);
+      transition: opacity 260ms ease, transform 260ms ease; }
 
-    .proof-item {
-      padding: 16px 28px; text-align: center;
-      border-right: 1px solid var(--border);
-    }
-    .proof-item:last-child { border-right: none; }
+    .tf-step-inner { max-width: 640px; width: 100%; }
 
-    .proof-val {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 20px; font-weight: 600; color: var(--teal);
-      display: block; margin-bottom: 3px;
-    }
-
-    .proof-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--text-3);
+    .tf-num {
+      font-size: 11px; font-weight: 600; color: var(--teal);
       letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+    }
+    .tf-num::after { content: '→'; font-size: 13px; }
+
+    .tf-q {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700; line-height: 1.15; color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .tf-q em { font-style: normal; color: var(--teal); }
+
+    .tf-hint {
+      font-size: 15px; color: var(--graphite); line-height: 1.7;
+      margin-bottom: 28px; max-width: 500px;
     }
 
-    /* ── Buttons ──────────────────────────────────────────── */
-    .btn {
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 14px; font-weight: 500;
-      padding: 11px 26px; border-radius: var(--radius);
-      cursor: pointer; border: none;
-      transition: background 180ms, box-shadow 180ms, opacity 180ms;
-      display: inline-flex; align-items: center; gap: 6px;
-      text-decoration: none; white-space: nowrap;
+    /* inputs */
+    .tf-input {
+      background: transparent; border: none;
+      border-bottom: 2px solid var(--line);
+      color: var(--ink); font-family: inherit; font-size: 17px;
+      padding: 10px 0; width: 100%; outline: none;
+      transition: border-color 200ms; display: block;
     }
+    .tf-input:focus { border-bottom-color: var(--teal); }
+    .tf-input::placeholder { color: #b0bcbb; }
 
-    .btn-primary {
-      background: var(--teal); color: #fff;
-      box-shadow: 0 1px 3px rgba(10,143,168,0.3);
+    .tf-select {
+      background: var(--white); border: 1px solid var(--line);
+      color: var(--ink); font-family: inherit; font-size: 15px;
+      padding: 10px 14px; border-radius: 10px;
+      outline: none; cursor: pointer; max-width: 180px;
+      transition: border-color 200ms;
     }
-    .btn-primary:hover { background: #0a8298; box-shadow: 0 4px 16px rgba(10,143,168,0.3); }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .tf-select:focus { border-color: var(--teal); }
 
-    .btn-ghost {
-      background: transparent; color: var(--teal);
-      border: 1px solid var(--teal-border);
-    }
-    .btn-ghost:hover { background: var(--teal-dim); border-color: var(--teal); }
+    .tf-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
 
-    .btn-sm { font-size: 12px; padding: 7px 14px; }
-
-    /* ── Section common ───────────────────────────────────── */
-    .section { padding: 72px 32px; }
-    .section-wrap { max-width: 720px; margin: 0 auto; }
-
-    .section-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; font-weight: 500;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--teal); margin-bottom: 8px;
-    }
-
-    h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-      color: var(--text-1); margin-bottom: 8px;
-    }
-
-    .section-sub { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 32px; }
-
-    /* ── Form ─────────────────────────────────────────────── */
-    .form-card {
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: 10px; padding: 32px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-    @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
-
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
-    .field:last-child { margin-bottom: 0; }
-
-    .label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; font-weight: 500;
-      letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3);
-    }
-    .label span { font-weight: 400; text-transform: none; letter-spacing: 0.04em; }
-
-    .input {
-      background: var(--bg);
-      border: 1px solid #ccdde4;
-      color: var(--text-1);
-      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
-      padding: 11px 14px; border-radius: var(--radius);
-      outline: none; width: 100%;
-      transition: border-color 180ms, box-shadow 180ms;
-    }
-    .input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,143,168,0.1); }
-    .input::placeholder { color: var(--text-3); }
-
-    .tag-box {
-      background: var(--bg);
-      border: 1px solid #ccdde4;
-      border-radius: var(--radius);
-      padding: 8px 10px;
+    /* tag box */
+    .tf-tag-box {
+      border-bottom: 2px solid var(--line);
+      padding: 8px 0 10px; width: 100%;
       display: flex; flex-wrap: wrap; gap: 6px;
-      min-height: 50px; cursor: text;
-      transition: border-color 180ms, box-shadow 180ms;
-      align-content: flex-start;
+      cursor: text; transition: border-color 200ms;
+      min-height: 48px; align-content: flex-start;
     }
-    .tag-box:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(10,143,168,0.1); }
+    .tf-tag-box:focus-within { border-bottom-color: var(--teal); }
 
-    .tag {
-      background: var(--teal-light);
-      border: 1px solid var(--teal-border);
-      color: var(--teal);
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-      padding: 3px 9px; border-radius: 4px;
+    .tf-tag {
+      background: var(--teal-bg); border: 1px solid var(--teal-bd);
+      color: var(--teal); font-size: 12px; font-weight: 500;
+      padding: 4px 10px; border-radius: var(--radius-full);
       display: flex; align-items: center; gap: 5px;
     }
-    .tag-x { cursor: pointer; opacity: 0.45; font-size: 13px; line-height: 1; transition: opacity 150ms; }
-    .tag-x:hover { opacity: 1; }
-    .tag-input {
-      background: transparent; border: none; outline: none;
-      color: var(--text-1); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
-      flex: 1; min-width: 130px; padding: 3px 4px;
+    .tf-tag-x {
+      cursor: pointer; opacity: 0.5; font-size: 14px;
+      line-height: 1; transition: opacity 150ms;
     }
+    .tf-tag-x:hover { opacity: 1; }
+    .tf-tag-input {
+      background: transparent; border: none; outline: none;
+      color: var(--ink); font-family: inherit; font-size: 16px;
+      flex: 1; min-width: 160px; padding: 3px 0;
+    }
+    .tf-tag-input::placeholder { color: #b0bcbb; }
 
+    /* pills (approaches, study types) */
+    .tf-pills { display: flex; flex-wrap: wrap; gap: 8px; max-width: 600px; }
+
+    .tf-pill {
+      padding: 9px 16px; border-radius: var(--radius-full);
+      border: 1.5px solid var(--line); background: var(--white);
+      cursor: pointer; transition: all 180ms; user-select: none;
+      font-size: 14px; font-weight: 500; color: var(--graphite);
+    }
+    .tf-pill:hover { border-color: var(--teal); color: var(--teal); }
+    .tf-pill.selected {
+      border-color: var(--teal); background: var(--teal-bg);
+      color: var(--teal);
+    }
+    .tf-pill input { display: none; }
+
+    /* toggle */
+    .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-track {
       position: absolute; inset: 0;
-      background: #dce8ed; border: 1px solid #b8d0d8;
-      border-radius: 12px; cursor: pointer; transition: 200ms;
+      background: var(--line); border-radius: var(--radius-full);
+      cursor: pointer; transition: 200ms;
     }
     .toggle-track::before {
       content: ''; position: absolute;
-      width: 16px; height: 16px; left: 3px; top: 3px;
-      background: #8aaab5; border-radius: 50%; transition: 200ms;
+      width: 16px; height: 16px; left: 4px; top: 4px;
+      background: var(--white); border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(29,37,36,0.15);
+      transition: 200ms;
     }
-    input:checked ~ .toggle-track { background: var(--teal-light); border-color: var(--teal); }
-    input:checked ~ .toggle-track::before { transform: translateX(20px); background: var(--teal); }
+    input:checked ~ .toggle-track { background: var(--teal); }
+    input:checked ~ .toggle-track::before { transform: translateX(20px); }
+    .toggle-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .toggle-sub   { font-size: 12px; color: var(--graphite); margin-top: 1px; }
 
-    .toggle-row { display: flex; align-items: center; gap: 12px; }
-    .toggle-main { font-size: 13px; color: var(--text-1); }
-    .toggle-sub  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-3); }
+    /* sub-label above tag boxes */
+    .field-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--graphite); margin-bottom: 8px;
+    }
+    .field-label span { text-transform: none; letter-spacing: 0; font-weight: 400; }
 
-    .rule { height: 1px; background: var(--border); margin: 28px 0; }
+    /* bottom nav */
+    .tf-bottom {
+      padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--line); background: var(--mist);
+    }
+    .tf-enter-hint { font-size: 12px; color: var(--graphite); }
+    .tf-enter-hint kbd {
+      background: var(--white); border: 1px solid var(--line);
+      padding: 2px 6px; border-radius: 5px; font-size: 11px;
+      font-family: inherit;
+    }
+    .tf-arrow-btns { display: flex; gap: 6px; }
+    .tf-arrow {
+      width: 34px; height: 34px; border-radius: 10px;
+      border: 1px solid var(--line); background: var(--white);
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--graphite);
+      font-size: 14px; transition: all 150ms; box-shadow: 0 1px 3px rgba(29,37,36,0.05);
+    }
+    .tf-arrow:hover { border-color: var(--teal); color: var(--teal); }
+    .tf-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ── Loading ──────────────────────────────────────────── */
-    .loading-wrap { max-width: 720px; margin: 0 auto; padding: 80px 32px; text-align: center; }
+    /* buttons */
+    .btn-ink {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--ink); color: var(--white);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 12px 24px; border-radius: var(--radius-full);
+      border: none; cursor: pointer; transition: all 180ms;
+      box-shadow: var(--shadow-lift);
+    }
+    .btn-ink:hover { background: #2e3c3a; }
+    .btn-ink:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--white); color: var(--ink);
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      padding: 11px 22px; border-radius: var(--radius-full);
+      border: 1.5px solid var(--line); cursor: pointer;
+      transition: all 180ms;
+    }
+    .btn-outline:hover { border-color: var(--ink); }
+
+    /* summary */
+    .summary-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px;
+    }
+    @media (max-width: 560px) { .summary-grid { grid-template-columns: 1fr; } }
+
+    .summary-card {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card); padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(29,37,36,0.04);
+    }
+    .summary-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--graphite); margin-bottom: 8px;
+    }
+    .summary-val { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .summary-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    /* tag chip in summary */
+    .chip-sm {
+      font-size: 11px; font-weight: 500;
+      background: var(--teal-bg); border: 1px solid var(--teal-bd);
+      color: var(--teal); padding: 3px 9px;
+      border-radius: var(--radius-full);
+    }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--ink); color: var(--white);
+      padding: 12px 20px; border-radius: var(--radius-card);
+      font-size: 13px; font-weight: 500; z-index: 300;
+      transform: translateY(64px); opacity: 0;
+      transition: all 250ms ease; max-width: 320px;
+      box-shadow: var(--shadow-lift);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.err { background: #b91c1c; }
+
+    /* loading */
+    .loading-wrap {
+      max-width: 480px; margin: 0 auto; padding: 80px 24px; text-align: center;
+    }
     .loading-bars {
       display: flex; align-items: flex-end; justify-content: center;
-      gap: 4px; margin-bottom: 28px; height: 28px;
+      gap: 4px; margin-bottom: 24px; height: 28px;
     }
-
     @keyframes bar-pulse {
       0%,100% { transform: scaleY(0.25); opacity: 0.3; }
-      50%      { transform: scaleY(1);   opacity: 1; }
+      50%      { transform: scaleY(1); opacity: 1; }
     }
-
     .bar {
-      width: 3px; height: 100%;
-      background: var(--teal); border-radius: 2px;
-      transform-origin: bottom;
+      width: 3px; height: 100%; background: var(--teal);
+      border-radius: 2px; transform-origin: bottom;
       animation: bar-pulse 0.9s ease-in-out infinite;
     }
     .bar:nth-child(2){animation-delay:.1s}
@@ -405,567 +325,210 @@
     .bar:nth-child(5){animation-delay:.4s}
     .bar:nth-child(6){animation-delay:.5s}
 
-    .loading-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px; color: var(--teal);
-      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px;
-    }
-    .loading-step { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-3); }
+    .loading-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+    .loading-step  { font-size: 13px; color: var(--graphite); }
 
-    /* ── Results ──────────────────────────────────────────── */
-    .results-header {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 16px;
-      margin-bottom: 28px; flex-wrap: wrap;
-    }
-
-    .results-meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-    .chip {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-      color: var(--text-3); background: var(--bg-raised);
-      border: 1px solid var(--border); padding: 3px 9px; border-radius: 4px;
-      white-space: nowrap; max-width: 280px;
-      overflow: hidden; text-overflow: ellipsis;
-    }
-
-    .queries-block {
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px 18px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .queries-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-      color: var(--text-3); letter-spacing: 0.16em;
-      text-transform: uppercase; margin-bottom: 10px;
-    }
-
-    /* Paper card */
-    .paper {
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: 9px; padding: 22px 24px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow-sm);
-      transition: border-color 200ms, box-shadow 200ms, transform 200ms;
-    }
-    .paper:hover {
-      border-color: var(--teal-border);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
-    }
-
-    .paper-top { display: flex; gap: 18px; align-items: flex-start; }
-
-    .match-badge {
-      width: 60px; height: 60px; border-radius: var(--radius);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      flex-shrink: 0; border: 1px solid;
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    .match-val { font-size: 22px; font-weight: 600; line-height: 1; }
-    .match-lbl { font-size: 8px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; margin-top: 2px; }
-
-    .match-high { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
-    .match-mid  { background: var(--teal-dim);  border-color: var(--teal-border);  color: var(--teal); }
-
-    .paper-title { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--text-1); margin-bottom: 10px; }
-
-    .paper-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; align-items: center; }
-
-    .meta-journal {
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-      font-weight: 600; color: var(--teal);
-    }
-
-    .meta-chip {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-      color: var(--text-3); background: var(--bg);
-      border: 1px solid #ccdde4; padding: 2px 8px; border-radius: 4px;
-    }
-
-    .study-badge {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-      padding: 2px 8px; border-radius: 4px; font-weight: 500;
-      background: var(--teal-light); color: var(--teal);
-      border: 1px solid var(--teal-border);
-    }
-
-    .insight-block { border-radius: 5px; padding: 12px 14px; margin-bottom: 10px; }
-    .insight-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
-      font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px;
-    }
-    .insight-text { font-size: 13px; line-height: 1.65; color: var(--text-2); }
-
-    .relevance-block { background: var(--teal-dim); border: 1px solid var(--teal-border); }
-    .relevance-block .insight-label { color: var(--teal); }
-
-    .takeaway-block  { background: var(--green-dim); border: 1px solid var(--green-border); }
-    .takeaway-block  .insight-label { color: var(--green); }
-
-    .abstract-toggle {
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-      color: var(--text-3); background: none; border: none;
-      cursor: pointer; padding: 0; margin-bottom: 10px;
-      display: flex; align-items: center; gap: 4px;
-      transition: color 150ms;
-    }
-    .abstract-toggle:hover { color: var(--teal); }
-
-    .abstract-body {
-      font-size: 12px; line-height: 1.75; color: var(--text-2);
-      background: var(--bg); border: 1px solid #ccdde4;
-      border-radius: 5px; padding: 14px 16px; margin-bottom: 10px; display: none;
-    }
-    .abstract-body.open { display: block; }
-
-    .paper-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-    /* ── Register ─────────────────────────────────────────── */
-    .register-box {
-      background: var(--teal-light);
-      border: 1px solid var(--teal-border);
-      border-radius: 10px; padding: 28px 32px;
-      display: flex; align-items: flex-start; gap: 32px; flex-wrap: wrap;
-      margin-top: 40px;
-    }
-    .register-text { flex: 1; min-width: 240px; }
-    .register-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--text-1); margin-bottom: 8px; }
-    .register-sub   { font-size: 14px; color: var(--text-2); line-height: 1.65; }
-    .register-actions { display: flex; flex-direction: column; gap: 8px; }
-    .nlm-note { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-3); }
-
-    /* ── Toast ────────────────────────────────────────────── */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--bg-raised); border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
-      padding: 12px 18px; border-radius: var(--radius);
-      font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-      color: var(--text-1); z-index: 200;
-      transform: translateY(64px); opacity: 0;
-      transition: transform 250ms ease, opacity 250ms ease;
-      max-width: 320px; line-height: 1.5;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.ok  { border-left: 3px solid var(--green); }
-    .toast.err { border-left: 3px solid #c0392b; }
-
-    /* ── Empty state ──────────────────────────────────────── */
-    .empty-state {
-      text-align: center; padding: 48px 24px;
-      border: 1px solid var(--border); border-radius: 9px;
-      background: var(--bg-raised); box-shadow: var(--shadow-sm);
-    }
-    .empty-title { font-size: 15px; color: var(--text-2); margin-bottom: 16px; }
-
-    /* ── Footer ───────────────────────────────────────────── */
-    footer {
-      padding: 24px 32px; border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px; margin-top: 80px;
-      background: var(--bg-raised);
-    }
-    .footer-brand { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-3); }
-    .footer-brand strong { color: var(--teal); letter-spacing: 0.1em; }
-    .footer-attr  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-3); }
-
-    .hidden { display: none !important; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 320ms ease-out both; }
-
-    /* ── Skeleton ─────────────────────────────────────────── */
+    /* skeleton */
     @keyframes shimmer {
       0%   { background-position: -600px 0; }
       100% { background-position:  600px 0; }
     }
-
     .skel {
-      background: linear-gradient(90deg, #e4edf2 25%, #f0f6f9 50%, #e4edf2 75%);
+      background: linear-gradient(90deg, #eaeeee 25%, #f3f6f6 50%, #eaeeee 75%);
       background-size: 1200px 100%;
       animation: shimmer 1.6s ease-in-out infinite;
-      border-radius: 4px;
+      border-radius: 8px;
     }
-
     .skel-card {
-      background: var(--bg-raised);
-      border: 1px solid var(--border);
-      border-radius: 9px; padding: 22px 24px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow-sm);
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card); padding: 22px 24px; margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(29,37,36,0.04);
+    }
+    .skel-row { display: flex; gap: 16px; }
+
+    /* results */
+    .results-wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 64px 0 80px; }
+
+    .eyebrow {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--teal); margin-bottom: 8px;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 700;
+      line-height: 1.15; color: var(--ink); margin-bottom: 6px;
+    }
+    .section-sub { font-size: 15px; color: var(--graphite); line-height: 1.7; margin-bottom: 28px; }
+
+    .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .meta-chip {
+      font-size: 11px; font-weight: 500; color: var(--graphite);
+      background: var(--white); border: 1px solid var(--line);
+      padding: 3px 10px; border-radius: var(--radius-full);
     }
 
-    .skel-top { display: flex; gap: 18px; align-items: flex-start; }
-
-    /* ── Typeform Overlay ─────────────────────────────────── */
-    .tf-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: var(--bg);
-      flex-direction: column;
-      display: none;
+    .queries-block {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(29,37,36,0.04);
     }
-    .tf-overlay.open {
-      display: flex;
-      animation: tfFadeIn 250ms ease both;
-    }
-    @keyframes tfFadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+    .queries-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--graphite); margin-bottom: 10px;
     }
 
-    /* top bar */
-    .tf-top {
-      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 32px;
+    /* paper card */
+    .paper {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card); padding: 22px 24px;
+      margin-bottom: 12px; transition: box-shadow 200ms;
+      box-shadow: 0 1px 4px rgba(29,37,36,0.04);
+    }
+    .paper:hover { box-shadow: var(--shadow-soft); }
+
+    .paper-top { display: flex; gap: 18px; align-items: flex-start; }
+
+    .match-badge {
+      width: 56px; height: 56px; border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0; border: 1.5px solid;
+      font-family: inherit;
+    }
+    .match-val { font-size: 20px; font-weight: 700; line-height: 1; }
+    .match-lbl { font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-top: 2px; }
+    .match-high { background: rgba(15,118,110,0.07); border-color: rgba(15,118,110,0.3); color: var(--teal); }
+    .match-mid  { background: rgba(15,118,110,0.05); border-color: rgba(15,118,110,0.18); color: var(--teal); }
+
+    .paper-title { font-size: 15px; font-weight: 600; line-height: 1.5; color: var(--ink); margin-bottom: 10px; }
+    .paper-meta  { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; }
+
+    .journal-name { font-size: 12px; font-weight: 600; color: var(--teal); }
+    .study-badge  {
+      font-size: 11px; font-weight: 600; padding: 3px 9px;
+      border-radius: var(--radius-full);
+      background: var(--teal-bg); color: var(--teal);
+      border: 1px solid var(--teal-bd);
     }
 
-    .tf-progress-bar {
-      position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: #dce8ed;
+    .insight-block { border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .insight-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; margin-bottom: 5px;
     }
-    .tf-progress-fill {
-      height: 100%; background: var(--teal);
-      transition: width 400ms ease;
-    }
+    .insight-text { font-size: 13px; line-height: 1.65; color: var(--graphite); }
 
-    .tf-counter {
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-      color: var(--text-3); letter-spacing: 0.1em;
-    }
+    .relevance-block { background: var(--teal-bg); border: 1px solid var(--teal-bd); }
+    .relevance-block .insight-label { color: var(--teal); }
+    .takeaway-block  { background: rgba(15,118,110,0.04); border: 1px solid rgba(15,118,110,0.12); }
+    .takeaway-block  .insight-label { color: var(--teal); }
 
-    .tf-close {
+    .abstract-toggle {
+      font-size: 12px; font-weight: 500; color: var(--graphite);
       background: none; border: none; cursor: pointer;
-      color: var(--text-3); font-size: 20px; line-height: 1;
-      transition: color 150ms; padding: 4px;
+      padding: 0; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 4px;
+      transition: color 150ms;
     }
-    .tf-close:hover { color: var(--text-1); }
-
-    /* step container */
-    .tf-steps { position: relative; flex: 1; overflow: hidden; }
-
-    .tf-step {
-      position: absolute; inset: 0;
-      display: flex; align-items: center;
-      padding: 80px max(32px, 12vw);
-      opacity: 0; pointer-events: none;
-      transform: translateY(48px);
-      transition: opacity 380ms ease, transform 380ms ease;
+    .abstract-toggle:hover { color: var(--teal); }
+    .abstract-body {
+      font-size: 12px; line-height: 1.75; color: var(--graphite);
+      background: var(--mist); border: 1px solid var(--line);
+      border-radius: 10px; padding: 14px 16px;
+      margin-bottom: 10px; display: none;
     }
-    .tf-step.active {
-      opacity: 1; pointer-events: auto; transform: translateY(0);
-    }
-    .tf-step.exit-up {
-      opacity: 0; transform: translateY(-48px);
-      transition: opacity 280ms ease, transform 280ms ease;
-    }
+    .abstract-body.open { display: block; }
 
-    .tf-step-inner { max-width: 680px; width: 100%; }
-
-    .tf-q-num {
-      font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-      font-weight: 600; color: var(--teal); letter-spacing: 0.12em;
-      margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
+    .paper-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-paper {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 8px 16px; border-radius: var(--radius-full);
+      border: 1.5px solid var(--line); background: var(--white);
+      cursor: pointer; color: var(--ink); transition: all 160ms;
+      display: inline-flex; align-items: center; gap: 5px;
+      text-decoration: none;
     }
-    .tf-q-num::after {
-      content: '→'; font-size: 14px;
+    .btn-paper:hover { border-color: var(--ink); }
+
+    .register-box {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card); padding: 28px 32px;
+      display: flex; align-items: flex-start; gap: 28px;
+      flex-wrap: wrap; margin-top: 32px;
+      box-shadow: var(--shadow-soft);
     }
+    .register-title { font-size: 1.4rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .register-sub   { font-size: 14px; color: var(--graphite); line-height: 1.65; }
+    .register-actions { display: flex; flex-direction: column; gap: 8px; }
+    .nlm-note { font-size: 11px; color: var(--graphite); }
 
-    .tf-question {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.7rem, 4vw, 2.6rem);
-      line-height: 1.18; color: var(--text-1);
-      margin-bottom: 10px;
+    .empty-state {
+      text-align: center; padding: 48px 24px;
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius-card);
     }
-    .tf-question em { font-style: italic; color: var(--teal); }
+    .empty-title { font-size: 15px; color: var(--graphite); margin-bottom: 16px; }
 
-    .tf-hint {
-      font-size: 14px; color: var(--text-2); line-height: 1.65;
-      margin-bottom: 32px; max-width: 520px;
-    }
-
-    /* inputs inside steps */
-    .tf-input {
-      background: transparent;
-      border: none; border-bottom: 2px solid #ccdde4;
-      color: var(--text-1);
-      font-family: 'IBM Plex Sans', sans-serif; font-size: 18px;
-      padding: 10px 0; width: 100%; max-width: 480px;
-      outline: none;
-      transition: border-color 200ms;
-      display: block;
-    }
-    .tf-input:focus { border-bottom-color: var(--teal); }
-    .tf-input::placeholder { color: var(--text-3); }
-
-    .tf-select {
-      background: var(--bg-raised); border: 1px solid #ccdde4;
-      color: var(--text-1); font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 16px; padding: 11px 14px; border-radius: var(--radius);
-      outline: none; cursor: pointer; max-width: 220px;
-      transition: border-color 200ms;
-    }
-    .tf-select:focus { border-color: var(--teal); }
-
-    .tf-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
-
-    /* tag input inside typeform */
-    .tf-tag-box {
-      background: transparent;
-      border-bottom: 2px solid #ccdde4;
-      padding: 8px 0 10px; max-width: 600px; width: 100%;
-      display: flex; flex-wrap: wrap; gap: 6px;
-      cursor: text; transition: border-color 200ms;
-      min-height: 52px; align-content: flex-start;
-    }
-    .tf-tag-box:focus-within { border-bottom-color: var(--teal); }
-
-    .tf-tag-input {
-      background: transparent; border: none; outline: none;
-      color: var(--text-1); font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 16px; flex: 1; min-width: 180px; padding: 2px 0;
-    }
-    .tf-tag-input::placeholder { color: var(--text-3); }
-
-    /* checkbox pills — Typeform style */
-    .tf-pills {
-      display: flex; flex-wrap: wrap; gap: 10px; max-width: 640px; margin-bottom: 8px;
+    .results-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; flex-wrap: wrap;
     }
 
-    .tf-pill {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 18px; border-radius: 4px;
-      border: 1.5px solid #ccdde4; background: var(--bg-raised);
-      cursor: pointer; transition: all 180ms; user-select: none;
-      font-size: 14px; color: var(--text-1);
+    footer {
+      padding: 20px 24px; border-top: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
     }
-    .tf-pill:hover { border-color: var(--teal); color: var(--teal); }
-    .tf-pill.selected {
-      border-color: var(--teal); background: var(--teal-light); color: var(--teal);
-      font-weight: 500;
-    }
-    .tf-pill input { display: none; }
+    .footer-brand { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .footer-attr  { font-size: 11px; color: var(--graphite); }
 
-    /* toggle row inside typeform */
-    .tf-toggle-group { display: flex; flex-direction: column; gap: 16px; max-width: 480px; }
-    .tf-toggle-row { display: flex; align-items: center; gap: 14px; }
-    .tf-toggle-label { font-size: 15px; color: var(--text-1); }
-    .tf-toggle-sub   { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-3); }
-
-    /* bottom nav */
-    .tf-bottom {
-      padding: 20px 32px; display: flex; align-items: center;
-      justify-content: space-between; border-top: 1px solid var(--border);
-      background: var(--bg);
+    .hidden { display: none !important; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-
-    .tf-enter-hint {
-      font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-3);
-    }
-    .tf-enter-hint kbd {
-      background: var(--bg-raised); border: 1px solid #ccdde4;
-      padding: 2px 6px; border-radius: 3px; font-size: 10px;
-    }
-
-    .tf-nav-btns { display: flex; gap: 8px; }
-
-    .tf-nav-btn {
-      width: 36px; height: 36px; border-radius: var(--radius);
-      border: 1px solid #ccdde4; background: var(--bg-raised);
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      color: var(--text-2); font-size: 16px; transition: all 180ms;
-    }
-    .tf-nav-btn:hover { border-color: var(--teal); color: var(--teal); }
-    .tf-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* summary step */
-    .tf-summary-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px;
-    }
-    @media (max-width: 600px) { .tf-summary-grid { grid-template-columns: 1fr; } }
-
-    .tf-summary-block {
-      background: var(--bg-raised); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 16px;
-    }
-    .tf-summary-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
-      font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
-      color: var(--text-3); margin-bottom: 8px;
-    }
-    .tf-summary-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-    .tf-summary-val  { font-size: 14px; color: var(--text-1); font-weight: 500; }
-
-    /* checkbox pills reused in typeform */
-    .check-pill {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px; border-radius: var(--radius);
-      border: 1px solid #ccdde4; background: var(--bg-raised);
-      cursor: pointer; transition: all 180ms; user-select: none;
-    }
-    .check-pill:hover { border-color: var(--teal); background: var(--teal-dim); }
-    .check-pill.selected { border-color: var(--teal); background: var(--teal-light); }
-    .check-pill input { display: none; }
-    .check-mark {
-      width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
-      border: 1.5px solid #ccdde4; background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      transition: all 180ms;
-    }
-    .check-pill.selected .check-mark { background: var(--teal); border-color: var(--teal); }
-    .check-pill.selected .check-mark::after {
-      content: ''; width: 4px; height: 7px;
-      border: 2px solid #fff; border-top: none; border-left: none;
-      transform: rotate(45deg) translate(-1px, -1px); display: block;
-    }
-    .check-pill-label { font-size: 13px; color: var(--text-1); }
-    .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+    .fade-up { animation: fadeUp 300ms ease-out both; }
   </style>
 </head>
 <body>
 
   <div id="toast" class="toast"></div>
 
-  <!-- Nav -->
-  <nav class="nav">
-    <div class="nav-brand">
-      <div class="nav-mark">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 1.5v11M1.5 7h11M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="#0a8fa8" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="nav-name">SURGIFY</span>
-    </div>
-    <span class="nav-source mono" style="font-size:11px;color:var(--text-3)">PubMed · 35M papers indexed</span>
-  </nav>
-
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-accent"></div>
-    <div class="hero-accent-2"></div>
-    <div class="hero-inner">
-
-      <!-- Left: text -->
-      <div>
-        <p class="eyebrow">Personalised Surgical Literature Monitor</p>
-        <h1>
-          Every week, the evidence<br>
-          that matters to <em>your procedures.</em><br>
-          Nothing else.
-        </h1>
-        <p class="hero-sub">
-          Surgeons spend an average of 3.5 hours per week searching for relevant research — most of it irrelevant to their specific practice. Surgify monitors PubMed continuously and delivers only the studies that map directly to the procedures and techniques you perform, with a clinical takeaway for each finding.
-        </p>
-        <div class="hero-proof">
-          <div class="proof-item">
-            <span class="proof-val">35M+</span>
-            <span class="proof-label">Papers monitored</span>
-          </div>
-          <div class="proof-item">
-            <span class="proof-val">Weekly</span>
-            <span class="proof-label">Automated search</span>
-          </div>
-          <div class="proof-item">
-            <span class="proof-val">Abstract</span>
-            <span class="proof-label">Level evidence</span>
-          </div>
-          <div class="proof-item">
-            <span class="proof-val">CPD</span>
-            <span class="proof-label">Ready citations</span>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="hero-cta">
-          Set up your profile
-        </button>
-      </div>
-
-      <!-- Right: sample result card -->
-      <div class="hero-right">
-        <div class="hero-card-stack">
-          <div class="hero-card-ghost"></div>
-          <div class="hero-sample-card">
-
-            <div class="sample-header">
-              <span class="sample-label">Literature Brief · Dr. James Whitfield</span>
-              <span class="sample-count">6 relevant papers</span>
-            </div>
-
-            <div class="sample-paper">
-              <div class="sample-badge">
-                <span class="sample-badge-val">9</span>
-                <span class="sample-badge-lbl">Match</span>
-              </div>
-              <div style="flex:1;min-width:0">
-                <p class="sample-paper-title">Long-term outcomes of DIEP flap breast reconstruction: a prospective cohort study.</p>
-                <div class="sample-meta">
-                  <span class="meta-journal" style="font-size:10px">Plast Reconstr Surg</span>
-                  <span class="meta-chip">2025 Mar</span>
-                  <span class="meta-chip">PMID 41823741</span>
-                  <span class="study-badge">Prospective</span>
-                </div>
-                <div class="sample-insight relevance-block">
-                  <p class="sample-insight-label" style="color:var(--teal)">Relevance to your practice</p>
-                  <p class="sample-insight-text">Directly evaluates DIEP flap outcomes — your primary reconstructive procedure — with 5-year efficacy and donor-site morbidity data relevant to patient counselling.</p>
-                </div>
-                <div class="sample-insight takeaway-block">
-                  <p class="sample-insight-label" style="color:var(--green)">Clinical Takeaway</p>
-                  <p class="sample-insight-text">92% satisfaction at 5 years; donor-site morbidity significantly lower than pedicled TRAM — supports DIEP as first-line in eligible candidates.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="sample-divider"></div>
-
-            <div class="sample-second-paper">
-              <div class="sample-second-badge">8</div>
-              <p class="sample-second-title">Intraoperative fluorescence imaging in free flap monitoring: a systematic review and meta-analysis.</p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Typeform Onboarding Overlay -->
+  <!-- ── Typeform Onboarding Overlay ───────────────────────── -->
   <div id="tf-overlay" class="tf-overlay">
 
-    <!-- Top bar -->
-    <div class="tf-top">
-      <div class="tf-progress-bar"><div class="tf-progress-fill" id="tf-progress-fill" style="width:0%"></div></div>
-      <span class="tf-counter mono" id="tf-counter">1 / 6</span>
-      <button class="tf-close" onclick="closeTF()" title="Close">✕</button>
+    <div class="tf-bar"><div class="tf-bar-fill" id="tf-bar-fill" style="width:0%"></div></div>
+
+    <div class="tf-nav">
+      <div class="tf-logo">
+        <div class="tf-logo-mark">⚕</div>
+        Surgify
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span class="tf-counter" id="tf-counter">1 / 6</span>
+        <button class="tf-close" onclick="closeTF()" title="Close">✕</button>
+      </div>
     </div>
 
-    <!-- Steps -->
     <div class="tf-steps">
 
       <!-- Step 1: Identity -->
       <div class="tf-step active" id="tf-step-1">
         <div class="tf-step-inner">
-          <p class="tf-q-num">01</p>
-          <h2 class="tf-question">Let's start with <em>who you are.</em></h2>
-          <p class="tf-hint">Your name and institution help personalise your weekly brief and identify your profile.</p>
-          <div class="tf-row" style="margin-bottom:24px">
+          <p class="tf-num">01</p>
+          <h2 class="tf-q">Let's start with <em>who you are.</em></h2>
+          <p class="tf-hint">Your name and institution help personalise your weekly brief and set up your monitoring profile.</p>
+          <div class="tf-row" style="margin-bottom:22px">
             <select id="inp-title" class="tf-select">
               <option>Dr</option><option>Mr</option><option>Ms</option>
               <option>Prof</option><option>Assoc Prof</option>
             </select>
-            <div style="flex:1;min-width:200px">
+            <div style="flex:1;min-width:180px">
               <input id="inp-name" class="tf-input" type="text" placeholder="James Whitfield" autocomplete="name">
             </div>
           </div>
-          <input id="inp-institution" class="tf-input" type="text" placeholder="Hospital or institution" style="margin-bottom:20px">
+          <input id="inp-institution" class="tf-input" type="text" placeholder="Hospital or institution" style="margin-bottom:18px">
           <div class="tf-row">
             <input id="inp-country" class="tf-input" type="text" placeholder="Country" style="max-width:220px">
             <input id="inp-exp" class="tf-input" type="number" placeholder="Years in practice" min="0" max="60" style="max-width:200px">
@@ -976,35 +539,35 @@
       <!-- Step 2: Specialty -->
       <div class="tf-step" id="tf-step-2">
         <div class="tf-step-inner">
-          <p class="tf-q-num">02</p>
-          <h2 class="tf-question">What is your <em>surgical specialty?</em></h2>
+          <p class="tf-num">02</p>
+          <h2 class="tf-q">What is your <em>surgical specialty?</em></h2>
           <p class="tf-hint">Your specialty and sub-specialty shape every search query we generate. The more specific, the better.</p>
-          <input id="inp-spec" class="tf-input" type="text" placeholder="e.g. Orthopaedic Surgery" style="margin-bottom:24px">
-          <input id="inp-subspec" class="tf-input" type="text" placeholder="Sub-specialty (optional)" style="margin-bottom:24px">
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Clinical interests — press Enter after each</p>
+          <input id="inp-spec" class="tf-input" type="text" placeholder="e.g. Breast Surgery" style="margin-bottom:22px">
+          <input id="inp-subspec" class="tf-input" type="text" placeholder="Sub-specialty — optional" style="margin-bottom:22px">
+          <p class="field-label">Clinical interests <span>— press Enter after each</span></p>
           <div class="tf-tag-box" id="interests-box" onclick="document.getElementById('interests-in').focus()">
-            <input id="interests-in" class="tf-tag-input" placeholder="implant longevity, periprosthetic infection...">
+            <input id="interests-in" class="tf-tag-input" placeholder="margin status, lymphoedema, radiotherapy…">
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Primary Procedures -->
+      <!-- Step 3: Procedures -->
       <div class="tf-step" id="tf-step-3">
         <div class="tf-step-inner">
-          <p class="tf-q-num">03</p>
-          <h2 class="tf-question">What procedures do you <em>perform most?</em></h2>
-          <p class="tf-hint">Start with your core practice — the procedures that make up the majority of your operating list. Press Enter after each.</p>
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Primary procedures</p>
-          <div class="tf-tag-box" id="primary-proc-box" style="margin-bottom:24px" onclick="document.getElementById('primary-proc-in').focus()">
-            <input id="primary-proc-in" class="tf-tag-input" placeholder="total knee arthroplasty, DIEP flap...">
+          <p class="tf-num">03</p>
+          <h2 class="tf-q">What procedures do you <em>perform?</em></h2>
+          <p class="tf-hint">Separate your core practice from occasional work and emerging techniques — it improves evidence weighting.</p>
+          <p class="field-label">Primary procedures <span>— press Enter after each</span></p>
+          <div class="tf-tag-box" id="primary-proc-box" style="margin-bottom:20px" onclick="document.getElementById('primary-proc-in').focus()">
+            <input id="primary-proc-in" class="tf-tag-input" placeholder="breast-conserving surgery, mastectomy…">
           </div>
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Secondary procedures <span style="text-transform:none;letter-spacing:0.04em;font-weight:400">— occasional</span></p>
-          <div class="tf-tag-box" id="secondary-proc-box" style="margin-bottom:24px" onclick="document.getElementById('secondary-proc-in').focus()">
-            <input id="secondary-proc-in" class="tf-tag-input" placeholder="shoulder arthroplasty, ankle fusion...">
+          <p class="field-label">Secondary procedures <span>— occasional</span></p>
+          <div class="tf-tag-box" id="secondary-proc-box" style="margin-bottom:20px" onclick="document.getElementById('secondary-proc-in').focus()">
+            <input id="secondary-proc-in" class="tf-tag-input" placeholder="oncoplastic reconstruction…">
           </div>
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Procedures in learning <span style="text-transform:none;letter-spacing:0.04em;font-weight:400">— emerging techniques to follow</span></p>
+          <p class="field-label">Procedures in learning <span>— emerging techniques to follow</span></p>
           <div class="tf-tag-box" id="learning-proc-box" onclick="document.getElementById('learning-proc-in').focus()">
-            <input id="learning-proc-in" class="tf-tag-input" placeholder="unicompartmental knee arthroplasty...">
+            <input id="learning-proc-in" class="tf-tag-input" placeholder="robotic mastectomy…">
           </div>
         </div>
       </div>
@@ -1012,10 +575,10 @@
       <!-- Step 4: Techniques -->
       <div class="tf-step" id="tf-step-4">
         <div class="tf-step-inner">
-          <p class="tf-q-num">04</p>
-          <h2 class="tf-question">How do you <em>operate?</em></h2>
-          <p class="tf-hint">Select your surgical approaches and add the specific techniques and devices you use. This is what makes your evidence brief unique to you.</p>
-          <div class="tf-pills" id="approaches-grid" style="margin-bottom:28px">
+          <p class="tf-num">04</p>
+          <h2 class="tf-q">How do you <em>operate?</em></h2>
+          <p class="tf-hint">Select your surgical approaches, then add specific techniques and devices. This makes your brief unique to your operative setup.</p>
+          <div class="tf-pills" id="approaches-grid" style="margin-bottom:24px">
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="open surgery">Open</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="laparoscopic">Laparoscopic</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="robotic-assisted">Robotic-assisted</label>
@@ -1025,13 +588,13 @@
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="microsurgery">Microsurgery</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="image-guided">Image-guided</label>
           </div>
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Specific techniques — press Enter after each</p>
-          <div class="tf-tag-box" id="techniques-box" style="margin-bottom:24px" onclick="document.getElementById('techniques-in').focus()">
-            <input id="techniques-in" class="tf-tag-input" placeholder="computer navigation, cementless fixation...">
+          <p class="field-label">Specific techniques <span>— press Enter after each</span></p>
+          <div class="tf-tag-box" id="techniques-box" style="margin-bottom:20px" onclick="document.getElementById('techniques-in').focus()">
+            <input id="techniques-in" class="tf-tag-input" placeholder="wide local excision, sentinel node biopsy…">
           </div>
-          <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px">Devices &amp; implants — press Enter after each</p>
+          <p class="field-label">Devices &amp; implants <span>— press Enter after each</span></p>
           <div class="tf-tag-box" id="devices-box" onclick="document.getElementById('devices-in').focus()">
-            <input id="devices-in" class="tf-tag-input" placeholder="Mako robotic system, posterior stabilised implant...">
+            <input id="devices-in" class="tf-tag-input" placeholder="tissue expander, acellular dermal matrix…">
           </div>
         </div>
       </div>
@@ -1039,10 +602,10 @@
       <!-- Step 5: Preferences -->
       <div class="tf-step" id="tf-step-5">
         <div class="tf-step-inner">
-          <p class="tf-q-num">05</p>
-          <h2 class="tf-question">What <em>evidence</em> matters most to you?</h2>
-          <p class="tf-hint">Filter by study type to see the level of evidence most relevant to your decision-making.</p>
-          <div class="tf-pills" id="study-types-grid" style="margin-bottom:32px">
+          <p class="tf-num">05</p>
+          <h2 class="tf-q">What <em>evidence</em> matters most to you?</h2>
+          <p class="tf-hint">Filter by study type and set your search window.</p>
+          <div class="tf-pills" id="study-types-grid" style="margin-bottom:28px">
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="RCT">RCT</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="Meta-analysis">Meta-analysis</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="Systematic review">Systematic review</label>
@@ -1052,14 +615,18 @@
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="Clinical guidelines">Guidelines</label>
             <label class="tf-pill" onclick="togglePill(this)"><input type="checkbox" value="Review article">Review</label>
           </div>
-          <div class="tf-toggle-group">
-            <div class="tf-toggle-row">
-              <label class="toggle"><input type="checkbox" id="tog-recent" checked><span class="toggle-track"></span></label>
-              <div><div class="tf-toggle-label">Recent publications only</div><div class="tf-toggle-sub">Last 7 days · toggle off for all-time</div></div>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="tog-recent" checked><span class="toggle-track"></span></label>
+            <div>
+              <div class="toggle-label">Recent publications only</div>
+              <div class="toggle-sub">Last 7 days · toggle off for all-time</div>
             </div>
-            <div class="tf-toggle-row">
-              <label class="toggle"><input type="checkbox" id="tog-cpd"><span class="toggle-track"></span></label>
-              <div><div class="tf-toggle-label">Enable CPD logging</div><div class="tf-toggle-sub">Track papers read for continuing professional development</div></div>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="tog-cpd"><span class="toggle-track"></span></label>
+            <div>
+              <div class="toggle-label">Enable CPD logging</div>
+              <div class="toggle-sub">Track papers read for continuing professional development</div>
             </div>
           </div>
         </div>
@@ -1067,12 +634,12 @@
 
       <!-- Step 6: Review -->
       <div class="tf-step" id="tf-step-6">
-        <div class="tf-step-inner" style="max-width:760px">
-          <p class="tf-q-num">06</p>
-          <h2 class="tf-question">Review your <em>profile.</em></h2>
-          <p class="tf-hint">Everything looks correct? Hit the button below to generate your first literature brief.</p>
-          <div id="tf-summary-content" style="margin-bottom:28px"></div>
-          <button id="search-btn" class="btn btn-primary" style="font-size:15px;padding:14px 36px" onclick="runSearch()">
+        <div class="tf-step-inner" style="max-width:720px">
+          <p class="tf-num">06</p>
+          <h2 class="tf-q">Review your <em>profile.</em></h2>
+          <p class="tf-hint">Everything correct? Hit the button to generate your first literature brief.</p>
+          <div id="tf-summary-content" style="margin-bottom:24px"></div>
+          <button id="search-btn" class="btn-ink" style="font-size:15px;padding:14px 32px">
             Generate my literature brief →
           </button>
         </div>
@@ -1083,185 +650,169 @@
     <!-- Bottom nav -->
     <div class="tf-bottom">
       <span class="tf-enter-hint">Press <kbd>Enter ↵</kbd> to continue</span>
-      <div class="tf-nav-btns">
-        <button class="tf-nav-btn" id="tf-prev-btn" onclick="tfStep(currentStep - 1)" disabled title="Previous">▲</button>
-        <button class="tf-nav-btn" id="tf-next-btn" onclick="tfStep(currentStep + 1)" title="Next">▼</button>
+      <div class="tf-arrow-btns">
+        <button class="tf-arrow" id="tf-prev-btn" onclick="tfStep(currentStep-1)" disabled>▲</button>
+        <button class="tf-arrow" id="tf-next-btn" onclick="tfStep(currentStep+1)">▼</button>
       </div>
     </div>
-
   </div>
 
-  <!-- anchor for scroll (empty, kept for legacy refs) -->
-  <div id="profile-section"></div>
-
-  <!-- Loading -->
-  <section id="loading-sec" class="hidden">
+  <!-- ── Loading ─────────────────────────────────────────── -->
+  <div id="loading-sec" class="hidden section">
     <div class="loading-wrap">
       <div class="loading-bars">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
-      <p class="loading-label">Searching PubMed</p>
-      <p id="loading-step" class="loading-step">Generating search queries from your profile...</p>
+      <p class="loading-title">Searching PubMed</p>
+      <p id="loading-step" class="loading-step">Generating search queries from your profile…</p>
     </div>
-  </section>
+  </div>
 
-  <!-- Results -->
+  <!-- ── Results ─────────────────────────────────────────── -->
   <section id="results-sec" class="hidden section">
-    <div class="section-wrap">
+    <div class="results-wrap">
       <div class="results-header">
         <div>
-          <p class="section-eyebrow">Literature Brief</p>
+          <p class="eyebrow">Literature Brief</p>
           <h2 style="margin-bottom:0">Your evidence summary</h2>
-          <div class="results-meta-row">
-            <span id="res-count" class="chip"></span>
-            <span id="res-time" class="chip"></span>
+          <div class="meta-row">
+            <span id="res-count" class="meta-chip"></span>
+            <span id="res-time"  class="meta-chip"></span>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="resetView()" style="margin-top:8px">← Edit profile</button>
+        <button class="btn-outline" onclick="resetView()" style="margin-top:8px">← Edit profile</button>
       </div>
+
       <div class="queries-block">
         <p class="queries-label">Search queries used</p>
         <div id="queries-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
+
       <div id="papers-list"></div>
+
       <div class="register-box">
-        <div class="register-text">
+        <div style="flex:1;min-width:220px">
           <h3 class="register-title">Automated weekly monitoring</h3>
           <p class="register-sub">Register your profile and Surgify will run this search automatically each week, storing your latest brief so it's ready when you return.</p>
         </div>
         <div class="register-actions">
-          <button id="reg-btn" class="btn btn-primary" onclick="registerProfile()">Register for weekly updates</button>
+          <button id="reg-btn" class="btn-ink" onclick="registerProfile()">Register for weekly updates</button>
           <p class="nlm-note">Data sourced from PubMed / National Library of Medicine</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
-    <p class="footer-brand"><strong>SURGIFY</strong> &nbsp;Surgical Literature Monitor</p>
-    <p class="footer-attr">Built at Applied Intelligence Hackathon · 2025 &nbsp;·&nbsp; Data: PubMed / NLM</p>
+    <span class="footer-brand">Surgify</span>
+    <span class="footer-attr">Built at Applied Intelligence Hackathon · 2025 · Data: PubMed / NLM</span>
   </footer>
 
   <script>
-const API_BASE = 'http://localhost:8000';
+    const API_BASE = 'http://localhost:8000';
     let profile = null;
     let currentStep = 1;
     const TOTAL_STEPS = 6;
 
-    // ── Overlay open / close ───────────────────────────────
+    // ── Open / close overlay ────────────────────────────────
     function openTF() {
-      const overlay = document.getElementById('tf-overlay');
-      overlay.classList.add('open');
+      const el = document.getElementById('tf-overlay');
+      el.style.display = 'flex';
+      requestAnimationFrame(() => el.classList.add('open'));
       document.body.style.overflow = 'hidden';
       currentStep = 1;
-      updateTFProgress();
+      updateProgress();
       document.querySelectorAll('.tf-step').forEach(s => s.classList.remove('active','exit-up'));
       document.getElementById('tf-step-1').classList.add('active');
     }
 
     function closeTF() {
       document.getElementById('tf-overlay').classList.remove('open');
+      setTimeout(() => {
+        document.getElementById('tf-overlay').style.display = 'none';
+      }, 220);
       document.body.style.overflow = '';
     }
 
     document.addEventListener('keydown', e => {
       if (!document.getElementById('tf-overlay').classList.contains('open')) return;
-      if (e.key === 'Enter' && currentStep < TOTAL_STEPS) {
-        const active = document.activeElement;
-        const isTagInput = active && active.classList.contains('tf-tag-input');
-        if (!isTagInput) tfStep(currentStep + 1);
-      }
+      const isTag = document.activeElement?.classList.contains('tf-tag-input');
+      if (e.key === 'Enter' && !isTag && currentStep < TOTAL_STEPS) tfStep(currentStep + 1);
       if (e.key === 'Escape') closeTF();
     });
 
-    // ── Tag arrays ─────────────────────────────────────────
+    // ── Tag inputs ──────────────────────────────────────────
     const tagArrays = {
-      'interests-box':      [],
-      'primary-proc-box':   [],
-      'secondary-proc-box': [],
-      'learning-proc-box':  [],
-      'techniques-box':     [],
-      'devices-box':        [],
+      'interests-box': [], 'primary-proc-box': [], 'secondary-proc-box': [],
+      'learning-proc-box': [], 'techniques-box': [], 'devices-box': []
+    };
+    const inputMap = {
+      'interests-box': 'interests-in', 'primary-proc-box': 'primary-proc-in',
+      'secondary-proc-box': 'secondary-proc-in', 'learning-proc-box': 'learning-proc-in',
+      'techniques-box': 'techniques-in', 'devices-box': 'devices-in'
     };
 
-    function setupTags(inputId, boxId) {
+    Object.keys(tagArrays).forEach(boxId => {
+      const inputId = inputMap[boxId];
       const inp = document.getElementById(inputId);
       const box = document.getElementById(boxId);
-      const arr = tagArrays[boxId];
+      if (!inp || !box) return;
       inp.addEventListener('keydown', e => {
         const val = inp.value.trim().replace(/,$/, '');
         if ((e.key === 'Enter' || e.key === ',') && val) {
           e.preventDefault();
-          if (!arr.includes(val)) {
-            arr.push(val);
+          if (!tagArrays[boxId].includes(val)) {
+            tagArrays[boxId].push(val);
             const t = document.createElement('div');
-            t.className = 'tag'; t.dataset.val = val;
-            t.innerHTML = `${val}<span class="tag-x" onclick="dropTag(this,'${boxId}')">×</span>`;
+            t.className = 'tf-tag'; t.dataset.val = val;
+            t.innerHTML = `${val}<span class="tf-tag-x" onclick="dropTag(this,'${boxId}')">×</span>`;
             box.insertBefore(t, inp);
           }
           inp.value = '';
-        } else if (e.key === 'Backspace' && !inp.value && arr.length) {
-          const tags = box.querySelectorAll('.tag');
+        } else if (e.key === 'Backspace' && !inp.value && tagArrays[boxId].length) {
+          const tags = box.querySelectorAll('.tf-tag');
           const last = tags[tags.length - 1];
-          if (last) { arr.splice(arr.indexOf(last.dataset.val), 1); last.remove(); }
+          if (last) { tagArrays[boxId].splice(tagArrays[boxId].indexOf(last.dataset.val), 1); last.remove(); }
         }
       });
-    }
+    });
 
     function dropTag(x, boxId) {
-      const tag = x.parentElement;
-      const arr  = tagArrays[boxId];
-      arr.splice(arr.indexOf(tag.dataset.val), 1);
-      tag.remove();
+      const t = x.parentElement;
+      tagArrays[boxId].splice(tagArrays[boxId].indexOf(t.dataset.val), 1);
+      t.remove();
     }
 
-    try {
-      setupTags('interests-in',      'interests-box');
-      setupTags('primary-proc-in',   'primary-proc-box');
-      setupTags('secondary-proc-in', 'secondary-proc-box');
-      setupTags('learning-proc-in',  'learning-proc-box');
-      setupTags('techniques-in',     'techniques-box');
-      setupTags('devices-in',        'devices-box');
-    } catch(e) { console.error('setupTags failed:', e); }
-
-    // ── Checkbox pills ─────────────────────────────────────
-    function togglePill(pill) {
-      pill.classList.toggle('selected');
-    }
-
+    // ── Pills ───────────────────────────────────────────────
+    function togglePill(pill) { pill.classList.toggle('selected'); }
     function getChecked(gridId) {
-      return [...document.querySelectorAll(`#${gridId} .check-pill.selected input`)]
-        .map(i => i.value);
+      return [...document.querySelectorAll(`#${gridId} .tf-pill.selected input`)].map(i => i.value);
     }
 
-    // ── Typeform step navigation ───────────────────────────
+    // ── Wizard navigation ───────────────────────────────────
     function tfStep(n) {
       if (n < 1 || n > TOTAL_STEPS) return;
       if (n > currentStep && !validateStep(currentStep)) return;
       if (n === TOTAL_STEPS) buildSummary();
 
-      const current = document.getElementById(`tf-step-${currentStep}`);
-      current.classList.add('exit-up');
-      setTimeout(() => current.classList.remove('active', 'exit-up'), 300);
+      const cur = document.getElementById(`tf-step-${currentStep}`);
+      cur.classList.add('exit-up');
+      setTimeout(() => cur.classList.remove('active', 'exit-up'), 280);
 
       currentStep = n;
-      updateTFProgress();
-
+      updateProgress();
       const next = document.getElementById(`tf-step-${n}`);
       next.classList.add('active');
-
-      // Focus first input in new step
       setTimeout(() => {
         const inp = next.querySelector('input:not([type=checkbox])');
         if (inp) inp.focus();
-      }, 380);
+      }, 370);
     }
 
-    function updateTFProgress() {
+    function updateProgress() {
       const pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
-      const fill = document.getElementById('tf-progress-fill');
+      const fill = document.getElementById('tf-bar-fill');
       const counter = document.getElementById('tf-counter');
       const prev = document.getElementById('tf-prev-btn');
       const next = document.getElementById('tf-next-btn');
@@ -1271,85 +822,69 @@ const API_BASE = 'http://localhost:8000';
       if (next)    next.disabled = currentStep >= TOTAL_STEPS;
     }
 
-    function validateStep(step) {
-      if (step === 1) {
-        if (!document.getElementById('inp-name').value.trim()) {
-          toast('Please enter your name.', 'err'); return false;
-        }
+    function validateStep(s) {
+      if (s === 1 && !document.getElementById('inp-name').value.trim()) {
+        toast('Please enter your name.', 'err'); return false;
       }
-      if (step === 2) {
-        if (!document.getElementById('inp-spec').value.trim()) {
-          toast('Please enter your surgical specialty.', 'err'); return false;
-        }
+      if (s === 2 && !document.getElementById('inp-spec').value.trim()) {
+        toast('Please enter your specialty.', 'err'); return false;
       }
-      if (step === 3) {
-        if (!tagArrays['primary-proc-box'].length) {
-          toast('Please add at least one primary procedure.', 'err'); return false;
-        }
+      if (s === 3 && !tagArrays['primary-proc-box'].length) {
+        toast('Please add at least one primary procedure.', 'err'); return false;
       }
       return true;
     }
 
-    // ── Build summary ──────────────────────────────────────
+    // ── Summary ─────────────────────────────────────────────
     function buildSummary() {
-      const title    = document.getElementById('inp-title').value;
-      const name     = document.getElementById('inp-name').value.trim();
-      const inst     = document.getElementById('inp-institution').value.trim();
-      const country  = document.getElementById('inp-country').value.trim();
-      const exp      = document.getElementById('inp-exp').value;
-      const spec     = document.getElementById('inp-spec').value.trim();
-      const subspec  = document.getElementById('inp-subspec').value.trim();
-      const recent   = document.getElementById('tog-recent').checked;
-      const cpd      = document.getElementById('tog-cpd').checked;
-      const approaches = getChecked('approaches-grid');
-      const studyTypes = getChecked('study-types-grid');
+      const title   = document.getElementById('inp-title').value;
+      const name    = document.getElementById('inp-name').value.trim();
+      const inst    = document.getElementById('inp-institution').value.trim();
+      const country = document.getElementById('inp-country').value.trim();
+      const exp     = document.getElementById('inp-exp').value;
+      const spec    = document.getElementById('inp-spec').value.trim();
+      const subspec = document.getElementById('inp-subspec').value.trim();
+      const recent  = document.getElementById('tog-recent').checked;
+      const cpd     = document.getElementById('tog-cpd').checked;
+      const approaches  = getChecked('approaches-grid');
+      const studyTypes  = getChecked('study-types-grid');
 
-      const tag = v => `<span class="tag" style="pointer-events:none">${v}</span>`;
-
+      const chip = v => `<span class="chip-sm">${v}</span>`;
       const blocks = [
-        { label: 'Surgeon', wide: true, val: `<span class="summary-val">${title} ${name}${inst ? ` · ${inst}` : ''}${country ? ` · ${country}` : ''} · ${exp || '?'} yrs</span>` },
-        { label: 'Specialty', val: `<span class="summary-val">${spec}${subspec ? ` / ${subspec}` : ''}</span>` },
-        { label: 'Clinical interests', val: tagArrays['interests-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Primary procedures', val: tagArrays['primary-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Secondary procedures', val: tagArrays['secondary-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Learning procedures', val: tagArrays['learning-proc-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Surgical approaches', val: approaches.map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None selected</span>' },
-        { label: 'Specific techniques', val: tagArrays['techniques-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Devices & implants', val: tagArrays['devices-box'].map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">None added</span>' },
-        { label: 'Study types', val: studyTypes.map(tag).join('') || '<span style="color:var(--text-3);font-size:13px">Any</span>' },
-        { label: 'Search window', val: `<span class="summary-val">${recent ? 'Last 7 days' : 'All time'}</span>` },
-        { label: 'CPD logging', val: `<span class="summary-val">${cpd ? 'Enabled' : 'Disabled'}</span>` },
+        { label: 'Surgeon', wide: true, val: `<span class="summary-val">${title} ${name}${inst ? ' · ' + inst : ''}${country ? ' · ' + country : ''} · ${exp || '?'} yrs</span>` },
+        { label: 'Specialty',          val: `<span class="summary-val">${spec}${subspec ? ' / ' + subspec : ''}</span>` },
+        { label: 'Clinical interests', val: tagArrays['interests-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None added</span>' },
+        { label: 'Primary procedures', val: tagArrays['primary-proc-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None</span>' },
+        { label: 'Secondary procedures',val: tagArrays['secondary-proc-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None</span>' },
+        { label: 'Learning procedures', val: tagArrays['learning-proc-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None</span>' },
+        { label: 'Surgical approaches', val: approaches.map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None selected</span>' },
+        { label: 'Techniques',          val: tagArrays['techniques-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None</span>' },
+        { label: 'Devices & implants',  val: tagArrays['devices-box'].map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">None</span>' },
+        { label: 'Study types',         val: studyTypes.map(chip).join('') || '<span style="color:var(--graphite);font-size:13px">Any</span>' },
+        { label: 'Search window',        val: `<span class="summary-val">${recent ? 'Last 7 days' : 'All time'}</span>` },
+        { label: 'CPD logging',          val: `<span class="summary-val">${cpd ? 'Enabled' : 'Disabled'}</span>` },
       ];
 
       const grid = document.createElement('div');
       grid.className = 'summary-grid';
       blocks.forEach(b => {
         const block = document.createElement('div');
-        block.className = 'summary-block' + (b.wide ? ' ' : '');
+        block.className = 'summary-card';
         if (b.wide) block.style.gridColumn = '1 / -1';
-        block.innerHTML = `<p class="summary-block-label">${b.label}</p><div class="summary-tags">${b.val}</div>`;
+        block.innerHTML = `<p class="summary-label">${b.label}</p><div class="summary-tags">${b.val}</div>`;
         grid.appendChild(block);
       });
 
       const container = document.getElementById('tf-summary-content');
       container.innerHTML = '';
-      const summaryGrid = document.createElement('div');
-      summaryGrid.className = 'tf-summary-grid';
-      blocks.forEach(b => {
-        const block = document.createElement('div');
-        block.className = 'tf-summary-block';
-        if (b.wide) block.style.gridColumn = '1 / -1';
-        block.innerHTML = `<p class="tf-summary-label">${b.label}</p><div class="tf-summary-tags">${b.val}</div>`;
-        summaryGrid.appendChild(block);
-      });
-      container.appendChild(summaryGrid);
+      container.appendChild(grid);
     }
 
-    // ── Build profile object ───────────────────────────────
+    // ── Build profile ────────────────────────────────────────
     function buildProfile() {
       return {
         title:               document.getElementById('inp-title').value,
-        name:                `${document.getElementById('inp-title').value} ${document.getElementById('inp-name').value.trim()}`,
+        name:                document.getElementById('inp-title').value + ' ' + document.getElementById('inp-name').value.trim(),
         institution:         document.getElementById('inp-institution').value.trim(),
         country:             document.getElementById('inp-country').value.trim(),
         experience_years:    parseInt(document.getElementById('inp-exp').value) || 0,
@@ -1369,118 +904,37 @@ const API_BASE = 'http://localhost:8000';
       };
     }
 
-    function saveProfile(p) {
-      try { localStorage.setItem('surgify_profile', JSON.stringify(p)); } catch {}
-    }
+    function saveProfile(p) { try { localStorage.setItem('surgintel_profile', JSON.stringify(p)); } catch {} }
 
-    function loadProfile() {
-      try {
-        const p = JSON.parse(localStorage.getItem('surgify_profile') || 'null');
-        if (!p) return;
-        if (p.title) document.getElementById('inp-title').value = p.title;
-        const nameParts = (p.name || '').replace(/^(Dr|Mr|Ms|Prof|Assoc Prof)\s+/, '');
-        document.getElementById('inp-name').value        = nameParts;
-        document.getElementById('inp-institution').value = p.institution || '';
-        document.getElementById('inp-country').value     = p.country || '';
-        document.getElementById('inp-exp').value         = p.experience_years || '';
-        document.getElementById('inp-spec').value        = p.specialty || '';
-        document.getElementById('inp-subspec').value     = p.subspecialty || '';
-        document.getElementById('tog-recent').checked    = p.recent_only !== false;
-        document.getElementById('tog-cpd').checked       = p.cpd_logging || false;
-
-        const tagMap = {
-          'interests-box':       p.clinical_interests   || [],
-          'primary-proc-box':    p.primary_procedures   || [],
-          'secondary-proc-box':  p.secondary_procedures || [],
-          'learning-proc-box':   p.learning_procedures  || [],
-          'techniques-box':      p.techniques           || [],
-          'devices-box':         p.devices              || [],
-        };
-        const inputMap = {
-          'interests-box':       'interests-in',
-          'primary-proc-box':    'primary-proc-in',
-          'secondary-proc-box':  'secondary-proc-in',
-          'learning-proc-box':   'learning-proc-in',
-          'techniques-box':      'techniques-in',
-          'devices-box':         'devices-in',
-        };
-        Object.entries(tagMap).forEach(([boxId, vals]) => {
-          const box = document.getElementById(boxId);
-          const inp = document.getElementById(inputMap[boxId]);
-          const arr = tagArrays[boxId];
-          vals.forEach(v => {
-            if (!arr.includes(v)) {
-              arr.push(v);
-              const t = document.createElement('div');
-              t.className = 'tag'; t.dataset.val = v;
-              t.innerHTML = `${v}<span class="tag-x" onclick="dropTag(this,'${boxId}')">×</span>`;
-              box.insertBefore(t, inp);
-            }
-          });
-        });
-
-        // Restore checkboxes
-        (p.approaches || []).forEach(val => {
-          document.querySelectorAll('#approaches-grid .check-pill').forEach(pill => {
-            if (pill.querySelector('input').value === val) pill.classList.add('selected');
-          });
-        });
-        (p.study_types || []).forEach(val => {
-          document.querySelectorAll('#study-types-grid .check-pill').forEach(pill => {
-            if (pill.querySelector('input').value === val) pill.classList.add('selected');
-          });
-        });
-      } catch {}
-    }
-
-    loadProfile();
-
-    // ── Loading steps ──────────────────────────────────────
-    const LOADING_STEPS = [
-      'Generating search queries from your profile...',
-      'Querying PubMed (National Library of Medicine)...',
-      'Retrieving recent publications...',
-      'Fetching paper abstracts...',
-      'Reviewing evidence relevance...',
-      'Scoring clinical applicability...',
-      'Compiling your brief...',
+    // ── Loading ──────────────────────────────────────────────
+    const STEPS = [
+      'Generating search queries from your profile…',
+      'Querying PubMed (National Library of Medicine)…',
+      'Retrieving recent publications…',
+      'Fetching paper abstracts…',
+      'Reviewing evidence relevance…',
+      'Scoring clinical applicability…',
+      'Compiling your brief…',
     ];
     let stepTimer;
     function startLoading() {
       let i = 0;
       const el = document.getElementById('loading-step');
-      el.textContent = LOADING_STEPS[0];
-      stepTimer = setInterval(() => { el.textContent = LOADING_STEPS[++i % LOADING_STEPS.length]; }, 3200);
+      el.textContent = STEPS[0];
+      stepTimer = setInterval(() => { el.textContent = STEPS[++i % STEPS.length]; }, 3200);
     }
     function stopLoading() { clearInterval(stepTimer); }
 
-    function detectStudyType(title) {
-      const t = title.toLowerCase();
-      if (/\brct\b|randomized|randomised/.test(t))  return 'RCT';
-      if (/meta.analys|systematic review/.test(t))  return 'Meta-analysis';
-      if (/\breview\b/.test(t))                     return 'Review';
-      if (/prospective/.test(t))                    return 'Prospective';
-      if (/retrospective/.test(t))                  return 'Retrospective';
-      if (/case series|case report/.test(t))        return 'Case Series';
-      if (/cohort/.test(t))                         return 'Cohort';
-      return null;
-    }
-
-    function toast(msg, type = 'ok') {
-      const el = document.getElementById('toast');
-      el.textContent = msg; el.className = `toast ${type} show`;
-      setTimeout(() => el.classList.remove('show'), 4500);
-    }
-
+    // ── Search ───────────────────────────────────────────────
     async function runSearch() {
       profile = buildProfile();
       saveProfile(profile);
-
       closeTF();
+
       document.getElementById('loading-sec').classList.remove('hidden');
       document.getElementById('results-sec').classList.remove('hidden');
       document.getElementById('search-btn').disabled = true;
-      document.getElementById('res-count').textContent = 'Searching PubMed...';
+      document.getElementById('res-count').textContent = 'Searching PubMed…';
       document.getElementById('res-time').textContent = '';
       document.getElementById('queries-chips').innerHTML = '';
       renderSkeletons();
@@ -1495,7 +949,6 @@ const API_BASE = 'http://localhost:8000';
         });
         if (!res.ok) throw new Error(`Server error ${res.status}`);
         await res.json();
-        // Redirect to the dashboard with the real profile
         window.location.href = '/app';
       } catch (err) {
         toast(`Search failed: ${err.message}`, 'err');
@@ -1512,19 +965,30 @@ const API_BASE = 'http://localhost:8000';
       for (let i = 0; i < count; i++) {
         list.innerHTML += `
           <div class="skel-card">
-            <div class="skel-top">
-              <div class="skel" style="width:60px;height:60px;border-radius:6px;flex-shrink:0"></div>
+            <div class="skel-row">
+              <div class="skel" style="width:56px;height:56px;border-radius:12px;flex-shrink:0"></div>
               <div style="flex:1;min-width:0">
                 <div class="skel" style="height:14px;width:88%;margin-bottom:8px"></div>
-                <div class="skel" style="height:14px;width:65%;margin-bottom:14px"></div>
-                <div class="skel" style="height:10px;width:45%;margin-bottom:14px"></div>
-                <div class="skel" style="height:58px;border-radius:5px;margin-bottom:8px"></div>
-                <div class="skel" style="height:58px;border-radius:5px;margin-bottom:12px"></div>
-                <div class="skel" style="height:28px;width:140px;border-radius:5px"></div>
+                <div class="skel" style="height:14px;width:64%;margin-bottom:14px"></div>
+                <div class="skel" style="height:10px;width:44%;margin-bottom:14px"></div>
+                <div class="skel" style="height:56px;border-radius:10px;margin-bottom:8px"></div>
+                <div class="skel" style="height:56px;border-radius:10px;margin-bottom:12px"></div>
+                <div class="skel" style="height:28px;width:130px;border-radius:20px"></div>
               </div>
             </div>
           </div>`;
       }
+    }
+
+    function detectStudyType(title) {
+      const t = title.toLowerCase();
+      if (/\brct\b|randomized|randomised/.test(t))  return 'RCT';
+      if (/meta.analys|systematic review/.test(t))  return 'Meta-analysis';
+      if (/\breview\b/.test(t))                     return 'Review';
+      if (/prospective/.test(t))                    return 'Prospective';
+      if (/retrospective/.test(t))                  return 'Retrospective';
+      if (/case series|case report/.test(t))        return 'Case Series';
+      return null;
     }
 
     function renderResults(data) {
@@ -1540,24 +1004,22 @@ const API_BASE = 'http://localhost:8000';
       qc.innerHTML = '';
       (data.search_terms || []).forEach(q => {
         const c = document.createElement('span');
-        c.className = 'chip'; c.title = q;
-        c.textContent = q.length > 60 ? q.slice(0,60) + '…' : q;
+        c.className = 'meta-chip'; c.title = q;
+        c.textContent = q.length > 55 ? q.slice(0,55) + '…' : q;
         qc.appendChild(c);
       });
 
       const list = document.getElementById('papers-list');
       list.innerHTML = '';
-
       if (!data.digest.length) {
         list.innerHTML = `
           <div class="empty-state">
             <p class="empty-title">No highly relevant papers found in the last 7 days.</p>
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('tog-recent').checked=false;runSearch()">Search all time →</button>
+            <button class="btn-outline" onclick="document.getElementById('tog-recent').checked=false;runSearch()">Search all time →</button>
           </div>`;
       } else {
         data.digest.forEach((item, i) => list.appendChild(buildCard(item, i)));
       }
-
       sec.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1572,7 +1034,6 @@ const API_BASE = 'http://localhost:8000';
       const card = document.createElement('div');
       card.className = 'paper fade-up';
       card.style.animationDelay = `${idx * 70}ms`;
-
       card.innerHTML = `
         <div class="paper-top">
           <div class="match-badge ${matchCls}">
@@ -1582,7 +1043,7 @@ const API_BASE = 'http://localhost:8000';
           <div style="flex:1;min-width:0">
             <p class="paper-title">${paper.title}</p>
             <div class="paper-meta">
-              <span class="meta-journal">${paper.journal}</span>
+              <span class="journal-name">${paper.journal}</span>
               <span class="meta-chip">${paper.pub_date}</span>
               <span class="meta-chip">PMID ${paper.pmid}</span>
               ${studyType ? `<span class="study-badge">${studyType}</span>` : ''}
@@ -1602,8 +1063,8 @@ const API_BASE = 'http://localhost:8000';
               <div class="abstract-body">${abstract}</div>
             ` : ''}
             <div class="paper-actions">
-              <a href="${paper.url}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Read on PubMed →</a>
-              <button class="btn btn-ghost btn-sm" onclick="copyCitation('${citation.replace(/'/g,"\\'")}')">Copy citation</button>
+              <a href="${paper.url}" target="_blank" rel="noopener" class="btn-paper">Read on PubMed ↗</a>
+              <button class="btn-paper" onclick="copyCitation('${citation.replace(/'/g,"\\'")}')">Copy citation</button>
             </div>
           </div>
         </div>`;
@@ -1618,27 +1079,26 @@ const API_BASE = 'http://localhost:8000';
 
     function copyCitation(text) {
       navigator.clipboard.writeText(text)
-        .then(() => toast('Citation copied to clipboard.'))
-        .catch(() => toast('Copy failed — please copy manually.', 'err'));
+        .then(() => toast('Citation copied.'))
+        .catch(() => toast('Copy failed.', 'err'));
     }
 
     async function registerProfile() {
       if (!profile) return;
       const btn = document.getElementById('reg-btn');
-      btn.disabled = true; btn.textContent = 'Registering...';
+      btn.disabled = true; btn.textContent = 'Registering…';
       try {
         const res = await fetch(`${API_BASE}/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profile),
         });
         if (!res.ok) throw new Error();
         btn.textContent = '✓ Registered';
-        btn.style.cssText = 'background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)';
+        btn.style.background = 'var(--teal)';
         toast('Registered. Your weekly brief will run automatically.');
       } catch {
         btn.disabled = false; btn.textContent = 'Register for weekly updates';
-        toast('Registration failed. Please try again.', 'err');
+        toast('Registration failed.', 'err');
       }
     }
 
@@ -1646,27 +1106,20 @@ const API_BASE = 'http://localhost:8000';
       document.getElementById('results-sec').classList.add('hidden');
       document.getElementById('loading-sec').classList.add('hidden');
       openTF();
-      tfStep(6);
     }
 
-    // Attach hero CTA
-    (function() {
-      var cta = document.getElementById('hero-cta');
-      if (cta) cta.addEventListener('click', openTF);
-    })();
+    function toast(msg, type = 'ok') {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.className = `toast ${type === 'err' ? 'err ' : ''}show`;
+      setTimeout(() => el.classList.remove('show'), 4500);
+    }
 
-    // Also expose to window for any remaining inline onclick attributes
-    window.openTF         = openTF;
-    window.closeTF        = closeTF;
-    window.tfStep         = tfStep;
-    window.togglePill     = togglePill;
-    window.getChecked     = getChecked;
-    window.runSearch      = runSearch;
-    window.registerProfile= registerProfile;
-    window.resetView      = resetView;
-    window.toggleAbstract = toggleAbstract;
-    window.copyCitation   = copyCitation;
-    window.dropTag        = dropTag;
+    // ── Auto-open on load ────────────────────────────────────
+    (function() {
+      const cta = document.getElementById('hero-cta');
+      if (cta) cta.addEventListener('click', openTF);
+      openTF();
+    })();
   </script>
 </body>
 </html>
