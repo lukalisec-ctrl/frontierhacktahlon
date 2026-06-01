@@ -1139,6 +1139,14 @@
   </footer>
 
   <script>
+    // ── Debug: catch any load error and show it visibly ────
+    window.onerror = function(msg, src, line, col, err) {
+      document.body.insertAdjacentHTML('afterbegin',
+        '<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;padding:12px 16px;font-family:monospace;font-size:13px">'
+        + 'JS ERROR line ' + line + ': ' + msg + '</div>'
+      );
+    };
+
     const API_BASE = 'http://localhost:8000';
     let profile = null;
     let currentStep = 1;
@@ -1211,12 +1219,14 @@
       tag.remove();
     }
 
-    setupTags('interests-in',      'interests-box');
-    setupTags('primary-proc-in',   'primary-proc-box');
-    setupTags('secondary-proc-in', 'secondary-proc-box');
-    setupTags('learning-proc-in',  'learning-proc-box');
-    setupTags('techniques-in',     'techniques-box');
-    setupTags('devices-in',        'devices-box');
+    try {
+      setupTags('interests-in',      'interests-box');
+      setupTags('primary-proc-in',   'primary-proc-box');
+      setupTags('secondary-proc-in', 'secondary-proc-box');
+      setupTags('learning-proc-in',  'learning-proc-box');
+      setupTags('techniques-in',     'techniques-box');
+      setupTags('devices-in',        'devices-box');
+    } catch(e) { console.error('setupTags failed:', e); }
 
     // ── Checkbox pills ─────────────────────────────────────
     function togglePill(pill) {
@@ -1639,11 +1649,18 @@
       tfStep(6);
     }
 
-    // Attach hero CTA via event listener (most reliable cross-browser)
-    document.addEventListener('DOMContentLoaded', function() {
+    // Attach hero CTA — script is at bottom of body so DOM is already ready
+    (function() {
       var cta = document.getElementById('hero-cta');
-      if (cta) cta.addEventListener('click', openTF);
-    });
+      if (cta) {
+        cta.addEventListener('click', openTF);
+      } else {
+        document.body.insertAdjacentHTML('afterbegin',
+          '<div style="position:fixed;top:40px;left:0;right:0;z-index:9999;background:orange;color:#000;padding:12px;font-family:monospace">'
+          + 'hero-cta button not found in DOM</div>'
+        );
+      }
+    })();
 
     // Also expose to window for any remaining inline onclick attributes
     window.openTF         = openTF;
