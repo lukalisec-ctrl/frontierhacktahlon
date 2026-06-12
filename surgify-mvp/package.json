@@ -20,7 +20,6 @@
     "vite": "^5.4.19"
   },
   "devDependencies": {
-    "@rollup/rollup-darwin-arm64": "^4.60.4",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3"
   }
